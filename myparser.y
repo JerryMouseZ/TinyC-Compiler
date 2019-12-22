@@ -7,11 +7,14 @@ ParserWizard generated YACC file.
 
 #include "mylexer.h"
 #include<iostream>
-#include "tree.h"
+#include<vector>
+#include<string>
 using namespace std;
 
 string temp_operator;
 extern int line;
+int temp_top = 0;
+vector<string> temp_table; 
 %}
 
 /////////////////////////////////////////////////////////////////////////////
@@ -40,6 +43,7 @@ extern int line;
 #ifndef YYSTYPE
 #define YYSTYPE Node*
 #endif
+#include "tree.h"
 }
 
 // place any declarations here
@@ -47,7 +51,7 @@ extern int line;
 %token INC_OP DEC_OP LEFT_OP RIGHT_OP LE_OP GE_OP EQ_OP NE_OP
 %token AND_OP OR_OP MUL_ASSIGN DIV_ASSIGN MOD_ASSIGN ADD_ASSIGN
 %token SUB_ASSIGN LEFT_ASSIGN RIGHT_ASSIGN AND_ASSIGN
-%token XOR_ASSIGN OR_ASSIGN
+%token XOR_ASSIGN OR_ASSIGN TYPE_NAME
 
 %token CHAR INT DOUBLE VOID
 %token BOOL 
@@ -71,28 +75,22 @@ postfix_expression
 	| postfix_expression '(' ')'	{cout<<"()";}
 	| postfix_expression '(' argument_expression_list ')'	{cout<<"arguement list"<<endl;}
 	| postfix_expression '.' IDENTIFIER	{
-		// ç»“æ„æ“ä½œï¼Œå–å‡ºè¯¥ç»“æ„çš„æˆå‘˜
+		// ½á¹¹²Ù×÷£¬È¡³ö¸Ã½á¹¹µÄ³ÉÔ±
 		cout<<"."<<endl;
 	}
 	| postfix_expression INC_OP {
 		$$ = generate_expr_node();
-		$$->children[0]=$1;
-		$$->code = $1->code 
-				+ "\tmov eax, " + glbtemp[$1->it] + "\n"
-				+ "\tinc eax" + "\n"
-				+ "\tmov [ebp - " + to_string(main_map[$1->val]) + "], eax" + "\n";
+		$$->children[0] = $1;
+		$$->code = $1->code + generate_post_code($1,"++");
 		$$->it = $1->it;
-		$$->sort = $1->sort;
+		$$->v_type = $1->v_type;
 	}
 	| postfix_expression DEC_OP {
 		$$ = generate_expr_node();
-		$$->children[0]=$1;
-		$$->code = $1->code 
-				+ "\tmov eax, " + glbtemp[$1->it] + "\n"
-				+ "\tdec eax" + "\n"
-				+ "\tmov [ebp - " + to_string(main_map[$1->val]) + "], eax" + "\n";
+		$$->children[0] = $1;
+		$$->code = $1->code + generate_post_code($1, "--");
 		$$->it = $1->it;
-		$$->sort = $1->sort;
+		$$->v_type = $1->v_type;
 	}
 	;
 
@@ -109,29 +107,24 @@ unary_expression
 	: postfix_expression
 	| INC_OP unary_expression {
 		$$ = generate_expr_node();
-		$$->children[0]=$2;
-		$$->code = $2->code 
-				+ "\tmov eax, " + glbtemp[$2->it] + "\n"
-				+ "\tinc eax" + "\n"
-				+ "\tmov " + glbtemp[$2->it] + ", eax" + "\n"
-				+ "\tmov [ebp - " + to_string(main_map[$2->val]) + "], eax" + "\n";
+		$$->children[0] = $2;
+		$$->code = $2->code + generate_post_code($2, "++");
 		$$->it = $2->it;
-		$$->sort = $2->sort;
+		$$->v_type = $2->v_type;
 	}
 	| DEC_OP unary_expression {
 		$$ = generate_expr_node();
-		$$->children[0]=$2;
-		$$->code = $2->code 
-				+ "\tmov eax, " + glbtemp[$2->it] + "\n"
-				+ "\tdec eax" + "\n"
-				+ "\tmov " + glbtemp[$2->it] + ", eax" + "\n"
-				+ "\tmov [ebp - " + to_string(main_map[$2->val]) + "], eax" + "\n";
+		$$->children[0] = $2;
+		$$->code = $2->code + generate_post_code($2, "--");
 		$$->it = $2->it;
-		$$->sort = $2->sort;
+		$$->v_type = $2->v_type;
 	}
 	| unary_operator unary_expression {
-		//ä¸€å †å‰ç¼€å•ç›®è¿ç®—ç¬¦ï¼Œå…ˆç»™å‡ºä¸€ç§
-		
+		$$ = generate_expr_node();
+		$$->children[0] = $2;
+		$$->code = $2->code + generate_pre_code($2, temp_operator);
+		$$->it = $2->it;
+		$$->v_type = $2->v_type;
 	}
 	;
 
@@ -150,23 +143,21 @@ multiplicative_expression
 		$$->children[0] = $1;
 		$$->children[1] = $3;
 		$1->sibing = $3;
-
+		$$->code = $1->code + $3->code; // ÏÈ°Ñº¢×ÓµÄ´úÂë¼ÓÉÏ
 		if($1->v_type != $3->v_type)
 		{
 			$$->state = Type_Err;
-			cout<<"wrong at line: "<<line<<endl;
+			cout<<"error in line "<<line<<endl;
 		}
 		else
 			$$->v_type = $1->v_type;
-		$$->code = $1->code + $3->code;
-		if($$->v_type==Double){
-			$$ += generate_double_code($1,$2,"*");
-		}
-		else{
+		if($1->v_type == Double)
+			$$->code += generate_double_code($1,$2,"*");
+		else
 			$$->code += generate_expr_code($1,$2,"*");
-		}
 		$$->it = $3->it;
-
+		// ¹æÔ¼ÁËÁ½¸öÁÙÊ±±äÁ¿£¬ĞèÒª·µ»¹Ò»¸ö
+		temp_top--;
 	}
 	| multiplicative_expression '/' unary_expression {
 		$$ = generate_expr_node();
@@ -174,21 +165,21 @@ multiplicative_expression
 		$$->children[1] = $3;
 		$1->sibing = $3;
 
+		$$->code = $1->code + $3->code; // ÏÈ°Ñº¢×ÓµÄ´úÂë¼ÓÉÏ
 		if($1->v_type != $3->v_type)
 		{
 			$$->state = Type_Err;
-			cout<<"wrong at line: "<<line<<endl;
+			cout<<"error in line "<<line<<endl;
 		}
 		else
 			$$->v_type = $1->v_type;
-		$$->code = $1->code + $3->code;
-		if($$->v_type==Double){
-			$$ += generate_double_code($1,$2,"/");
-		}
-		else{
+		if($1->v_type == Double)
+			$$->code += generate_double_code($1,$2,"/");
+		else
 			$$->code += generate_expr_code($1,$2,"/");
-		}
 		$$->it = $3->it;
+		// ¹æÔ¼ÁËÁ½¸öÁÙÊ±±äÁ¿£¬ĞèÒª·µ»¹Ò»¸ö
+		temp_top--;
 	}
 	| multiplicative_expression '%' unary_expression {
 		$$ = generate_expr_node();
@@ -196,16 +187,19 @@ multiplicative_expression
 		$$->children[1] = $3;
 		$1->sibing = $3;
 
+		$$->code = $1->code + $3->code; // ÏÈ°Ñº¢×ÓµÄ´úÂë¼ÓÉÏ
 		if($1->v_type != $3->v_type)
 		{
 			$$->state = Type_Err;
-			cout<<"wrong at line: "<<line<<endl;
+			cout<<"error in line "<<line<<endl;
 		}
 		else
 			$$->v_type = $1->v_type;
-		$$->code = $1->code + $3->code;
+		
 		$$->code += generate_expr_code($1,$2,"%");
 		$$->it = $3->it;
+		// ¹æÔ¼ÁËÁ½¸öÁÙÊ±±äÁ¿£¬ĞèÒª·µ»¹Ò»¸ö
+		temp_top--;
 	}
 	;
 
@@ -216,44 +210,39 @@ additive_expression
 		$$->children[0] = $1;
 		$$->children[1] = $3;
 		$1->sibing = $3;
-		// ä¸‹é¢æ ¹æ®+å·ç»™å‡ºè¯­æ³•åˆ¶å¯¼ç¿»è¯‘ï¼Œç¿»è¯‘å‡ºäºŒè€…çš„å¥å­
+		// ÏÂÃæ¸ù¾İ+ºÅ¸ø³öÓï·¨ÖÆµ¼·­Òë£¬·­Òë³ö¶şÕßµÄ¾ä×Ó
+		$$->code = $1->code + $3->code; // ÏÈ°Ñº¢×ÓµÄ´úÂë¼ÓÉÏ
 		if($1->v_type != $3->v_type)
 		{
 			$$->state = Type_Err;
-			cout<<"wrong at line: "<<line<<endl;
+			cout<<"error in line "<<line<<endl;
 		}
 		else
 			$$->v_type = $1->v_type;
-		$$->code = $1->code + $3->code;
-		if($$->v_type==Double){
-			$$ += generate_double_code($1,$2,"+");
-		}
-		else{
+		if($1->v_type == Double)
+			$$->code += generate_double_code($1,$2,"+");
+		else
 			$$->code += generate_expr_code($1,$2,"+");
-		}
 		$$->it = $3->it;
+		// ¹æÔ¼ÁËÁ½¸öÁÙÊ±±äÁ¿£¬ĞèÒª·µ»¹Ò»¸ö
+		temp_top--;
 	}
 	| additive_expression '-' multiplicative_expression {
-		$$ = generate_expr_node();
-		$$->children[0] = $1;
-		$$->children[1] = $3;
-		$1->sibing = $3;
-
+		$$->code = $1->code + $3->code; // ÏÈ°Ñº¢×ÓµÄ´úÂë¼ÓÉÏ
 		if($1->v_type != $3->v_type)
 		{
 			$$->state = Type_Err;
-			cout<<"wrong at line: "<<line<<endl;
+			cout<<"error in line "<<line<<endl;
 		}
 		else
 			$$->v_type = $1->v_type;
-		$$->code = $1->code + $3->code;
-		if($$->v_type==Double){
-			$$ += generate_double_code($1,$2,"-");
-		}
-		else{
+		if($1->v_type == Double)
+			$$->code += generate_double_code($1,$2,"-");
+		else
 			$$->code += generate_expr_code($1,$2,"-");
-		}
 		$$->it = $3->it;
+		// ¹æÔ¼ÁËÁ½¸öÁÙÊ±±äÁ¿£¬ĞèÒª·µ»¹Ò»¸ö
+		temp_top--;
 	}
 	;
 
@@ -265,17 +254,18 @@ shift_expression
 		$$->children[1] = $3;
 		$1->sibing = $3;
 
+		$$->code = $1->code + $3->code; // ÏÈ°Ñº¢×ÓµÄ´úÂë¼ÓÉÏ
 		if($1->v_type != $3->v_type)
 		{
 			$$->state = Type_Err;
-			cout<<"wrong at line: "<<line<<endl;
+			cout<<"error in line "<<line<<endl;
 		}
 		else
 			$$->v_type = $1->v_type;
-		$$->code = $1->code + $3->code;
 		$$->code += generate_expr_code($1,$2,"<<");
-		}
 		$$->it = $3->it;
+		// ¹æÔ¼ÁËÁ½¸öÁÙÊ±±äÁ¿£¬ĞèÒª·µ»¹Ò»¸ö
+		temp_top--;
 
 	}
 	| shift_expression RIGHT_OP additive_expression {
@@ -284,17 +274,18 @@ shift_expression
 		$$->children[1] = $3;
 		$1->sibing = $3;
 
+		$$->code = $1->code + $3->code; // ÏÈ°Ñº¢×ÓµÄ´úÂë¼ÓÉÏ
 		if($1->v_type != $3->v_type)
 		{
 			$$->state = Type_Err;
-			cout<<"wrong at line: "<<line<<endl;
+			cout<<"error in line "<<line<<endl;
 		}
 		else
 			$$->v_type = $1->v_type;
-		$$->code = $1->code + $3->code;
 		$$->code += generate_expr_code($1,$2,">>");
-		}
 		$$->it = $3->it;
+		// ¹æÔ¼ÁËÁ½¸öÁÙÊ±±äÁ¿£¬ĞèÒª·µ»¹Ò»¸ö
+		temp_top--;
 	}
 	;
 
@@ -350,17 +341,18 @@ and_expression
 		$$->children[1] = $3;
 		$1->sibing = $3;
 
+		$$->code = $1->code + $3->code; // ÏÈ°Ñº¢×ÓµÄ´úÂë¼ÓÉÏ
 		if($1->v_type != $3->v_type)
 		{
 			$$->state = Type_Err;
-			cout<<"wrong at line: "<<line<<endl;
+			cout<<"error in line "<<line<<endl;
 		}
 		else
 			$$->v_type = $1->v_type;
-		$$->code = $1->code + $3->code;
 		$$->code += generate_expr_code($1,$2,"&");
-		}
 		$$->it = $3->it;
+		// ¹æÔ¼ÁËÁ½¸öÁÙÊ±±äÁ¿£¬ĞèÒª·µ»¹Ò»¸ö
+		temp_top--;
 	}
 	;
 
@@ -372,17 +364,18 @@ exclusive_or_expression
 		$$->children[1] = $3;
 		$1->sibing = $3;
 
+		$$->code = $1->code + $3->code; // ÏÈ°Ñº¢×ÓµÄ´úÂë¼ÓÉÏ
 		if($1->v_type != $3->v_type)
 		{
 			$$->state = Type_Err;
-			cout<<"wrong at line: "<<line<<endl;
+			cout<<"error in line "<<line<<endl;
 		}
 		else
 			$$->v_type = $1->v_type;
-		$$->code = $1->code + $3->code;
-		$$->code += generate_expr_code($1 , $2, "^");
-		}
+		$$->code += generate_expr_code($1,$2,"^");
 		$$->it = $3->it;
+		// ¹æÔ¼ÁËÁ½¸öÁÙÊ±±äÁ¿£¬ĞèÒª·µ»¹Ò»¸ö
+		temp_top--;
 	}
 	;
 
@@ -394,17 +387,18 @@ inclusive_or_expression
 		$$->children[1] = $3;
 		$1->sibing = $3;
 
+		$$->code = $1->code + $3->code; // ÏÈ°Ñº¢×ÓµÄ´úÂë¼ÓÉÏ
 		if($1->v_type != $3->v_type)
 		{
 			$$->state = Type_Err;
-			cout<<"wrong at line: "<<line<<endl;
+			cout<<"error in line "<<line<<endl;
 		}
 		else
 			$$->v_type = $1->v_type;
-		$$->code = $1->code + $3->code;
 		$$->code += generate_expr_code($1,$2,"|");
-		}
 		$$->it = $3->it;
+		// ¹æÔ¼ÁËÁ½¸öÁÙÊ±±äÁ¿£¬ĞèÒª·µ»¹Ò»¸ö
+		temp_top--;
 	}
 	;
 
@@ -432,7 +426,7 @@ logical_or_expression
 assignment_expression
 	: logical_or_expression {$$ = $1;}
 	| unary_expression assignment_operator assignment_expression {
-		//æ€ä¹ˆæ‹¿åˆ°å˜é‡çš„æ ‡è¯†ç¬¦å‘¢
+		//ÔõÃ´ÄÃµ½±äÁ¿µÄ±êÊ¶·ûÄØ
 		// $$ = new Node();
 		// $$->op = $2;
 		
@@ -482,7 +476,7 @@ init_declarator
 	}
 	| declarator '=' initializer {
 		// a=1
-		// è¿™é‡Œä¸åº”è¯¥ä½¿ç”¨èµ‹å€¼è¯­å¥ï¼Œè€Œæ˜¯å­˜è¿›å˜é‡è¡¨ä¸­èŠ‚ç‚¹çš„åˆå§‹å€¼
+		//
 	}
 	;
 
@@ -494,6 +488,7 @@ type_specifier
 	| DOUBLE
 	| BOOL
 	| struct_or_union_specifier
+	| TYPE_NAME
 	;
 
 struct_or_union_specifier
@@ -543,15 +538,13 @@ declarator
 	}
 	| direct_declarator {
 		// a
-
 	}
 	;
 
 
 direct_declarator
 	: IDENTIFIER {
-		$$ = $1;
-		$$ = generate_ID_Node();
+
 	}
 	| '(' declarator ')'
 	| direct_declarator '[' assignment_expression ']'
@@ -583,12 +576,8 @@ parameter_declaration
 	;
 
 identifier_list
-	: IDENTIFIER {
-
-	}
-	| identifier_list ',' IDENTIFIER {
-
-	}
+	: IDENTIFIER
+	| identifier_list ',' IDENTIFIER
 	;
 
 
@@ -746,7 +735,7 @@ int main(int argc, char*argv[])
 	myparser parser;
 	if (parser.yycreate(&lexer)) {
 		if (lexer.yycreate(&parser)) {
-			// æœ€åæµ‹è¯•æˆåŠŸäº†ä»¥åå†æ”¹æ–‡ä»¶
+			// ×îºó²âÊÔ³É¹¦ÁËÒÔºóÔÙ¸ÄÎÄ¼ş
 			// lexer.yyin = new ifstream(argv[1]);
 			// lexer.yyout = new ofstream(argv[2]);
 			n = parser.yyparse();

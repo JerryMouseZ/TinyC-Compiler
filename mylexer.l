@@ -8,15 +8,19 @@ ParserWizard generated Lex file.
 #include "myparser.h"
 #include<sstream>
 #include<string>
-int line = 0;
 
 extern class Node;
 extern Node* generate_const_node();
-extern unordered_map<string, string> ID_Table; // æŒ‡ç¤ºIDæ˜¯æ™®é€šå˜é‡ï¼Œç»“æ„ï¼Œè¿˜æ˜¯å‡½æ•°
-extern unordered_map<string, VarEntry> Var_Table; // å­˜å‚¨æ™®é€šå˜é‡çš„ç±»å‹å’Œåˆå§‹å€¼
-extern unordered_map<string, StructEntry> Struct_Table;// å­˜å‚¨ç»“æ„ä½“çš„
-extern unordered_map<string, FuncEntry> Fuction_Table;// å­˜å‚¨å‡½æ•°å®šä¹‰
-void count(char*section);
+extern enum VALUE_TYPE;
+extern enum ID_TYPE;
+extern enum NODE_TYPE;
+extern union Value;
+unordered_map<string, string> ID_Table;
+unordered_map<string, VarEntry> Var_Table;
+unordered_map<string, StructEntry> Struct_Table;
+unordered_map<string, FuncEntry> Fuction_Table;
+int line = 0;
+void countline(char*dd);
 %}
 
 /////////////////////////////////////////////////////////////////////////////
@@ -61,7 +65,7 @@ E			([Ee][+-]?{D}+)
 // place your Lex rules here
 
 "//".*			{}
-("/*"(([^\*]"/")|([^\/]"*")|([^\/\*]))*"*/") {count(yytext);}
+("/*"(([^\*]"/")|([^\/]"*")|([^\/\*]))*"*/") {countline(yytext);}
 "bool"			{ return(BOOL); }
 "break"			{ return(BREAK); }
 "char"			{ return(CHAR); }
@@ -79,18 +83,18 @@ E			([Ee][+-]?{D}+)
 "while"			{ return(WHILE); }
 
 {L}({L}|{D})*			{ 
-							// å¦‚æœæ‰¾åˆ°ç±»å‹äº†ï¼Œåº”å½“ç»™è¿™ä¸ªæ ‡è¯†ç¬¦ç±»å‹ï¼Œå¦åˆ™å°±æ˜¯ç©ºç±»å‹
+							// Èç¹ûÕÒµ½ÀàĞÍÁË£¬Ó¦µ±¸øÕâ¸ö±êÊ¶·ûÀàĞÍ£¬·ñÔò¾ÍÊÇ¿ÕÀàĞÍ
 							// check_type(yytext);
 							yylval = new Node();
 							yylval->nd_type = ID_t;
 							yylval->v_type = None;
-							// IDçš„åå­—å­˜å‚¨åœ¨äº†temp_nameä¸­
-							yylval->temp_name = yytext;
+							// IDµÄÃû×Ö´æ´¢ÔÚÁËtemp_nameÖĞ
+							yylval->name = yytext;
 							return(IDENTIFIER); 
 						}
 
 0[xX]{H}+				{ 
-							// 16è¿›åˆ¶æ•´æ•°
+							// 16½øÖÆÕûÊı
 							stringstream ss;
 							ss<<yytext;
 							int temp;
@@ -101,7 +105,7 @@ E			([Ee][+-]?{D}+)
 							return(CONSTANT);
 						}
 0[0-7]*					{ 
-							// 8è¿›åˆ¶æ•´æ•°
+							// 8½øÖÆÕûÊı
 							stringstream ss;
 							ss<<yytext;
 							int temp;
@@ -112,7 +116,7 @@ E			([Ee][+-]?{D}+)
 							return(CONSTANT); 
 						}
 [1-9]{D}*				{ 
-							// 10è¿›åˆ¶æ•´æ•°
+							// 10½øÖÆÕûÊı
 							stringstream ss;
 							ss<<yytext;
 							int temp;
@@ -125,7 +129,7 @@ E			([Ee][+-]?{D}+)
 
 
 {D}+{E}					{ 
-							// 3e8 ç§‘å­¦è®¡æ•°æ³•
+							// 3e8 ¿ÆÑ§¼ÆÊı·¨
 							stringstream ss;
 							ss<<yytext;
 							double temp;
@@ -136,7 +140,7 @@ E			([Ee][+-]?{D}+)
 							return(CONSTANT); 
 						}
 {D}*"."{D}+{E}?			{ 
-							// 1.23e4  ç§‘å­¦è®¡æ•°æ³•
+							// 1.23e4  ¿ÆÑ§¼ÆÊı·¨
 							stringstream ss;
 							ss<<yytext;
 							double temp;
@@ -150,7 +154,7 @@ E			([Ee][+-]?{D}+)
 
 
 L?\"(\\.|[^\\"\n])*\"	{ 
-							// å­—ç¬¦ä¸²å¸¸é‡
+							// ×Ö·û´®³£Á¿
 							stringstream ss;
 							ss<<yytext;
 							string temp;
@@ -203,7 +207,7 @@ L?\"(\\.|[^\\"\n])*\"	{
 ">"				{ return('>'); }
 "^"				{ return('^'); }
 "|"				{ return('|'); }
-[ \t\v\n\f]		{ count(yytext); }
+[ \t\v\n\f]		{ countline(yytext); }
 .			{ /* Add code to complain about unmatched characters */ }
 
 %%
@@ -217,22 +221,36 @@ int yywrap(void)
 }
 
 
-// ç”¨æ¥è®¡ç®—è¡Œå·ç»™å‡ºé”™è¯¯ä¿¡æ¯
+// ÓÃÀ´¼ÆËãĞĞºÅ¸ø³ö´íÎóĞÅÏ¢
 int column = 0;
 
 void check_type(char*id){
 	;
 }
 
-void count(char*section){
-	for(int i=0;section[i]!='\0',i++){
-		if(section[i]=='\0')
+void countline(char * dd){
+	for(int i=0;dd[i]!=0;i++){
+		if(dd[i]=='\n')
 			line++;
 	}
 }
+// ÖÁÓÚÕâ¸öĞĞºÅ¼Ç²»¼ÇÖ»ÊÇ¼ì²éµÄÊ±ºòÓĞÓÃ£¬¿ÉÒÔ²»¹ÜÁË
+// void count(char*yytext)
+// {
+// 	int i;
 
+// 	for (i = 0; yytext[i] != '\0'; i++)
+// 		if (yytext[i] == '\n')
+// 			column = 0;
+// 		else if (yytext[i] == '\t')
+// 			column += 8 - (column % 8);
+// 		else
+// 			column++;
 
-// æ£€æŸ¥æ ‡è¯†ç¬¦çš„ç±»å‹ï¼Œç•™ç€ä»¥åæœ‰ç”¨
+// 	// ECHO;
+// }
+
+// ¼ì²é±êÊ¶·ûµÄÀàĞÍ£¬Áô×ÅÒÔºóÓĞÓÃ
 // int check_type(void)
 // {
 // /*

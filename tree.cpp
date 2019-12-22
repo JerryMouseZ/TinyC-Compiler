@@ -14,25 +14,25 @@ void tree::gen_header(ostream &out)
     out << "\tincludelib \\masm32\\lib\\kernel32.lib" << endl;
     out << "\tincludelib \\masm32\\lib\\masm32.lib" << endl;
 }
-void tree::stmt_get_label(Node *t) // ç»™æ¯ä¸€ä¸ªèŠ‚ç‚¹ç”Ÿæˆæ ‡ï¿½?
+void tree::stmt_get_label(Node *t) // ¸øÃ¿Ò»??½ÚµãÉú³É±ê??
 {
 }
-void tree::expr_get_label(Node *t) // ç”Ÿæˆå¸ƒå°”è¡¨è¾¾å¼è¯­å¥çš„æ ‡å·
+void tree::expr_get_label(Node *t) // Éú³É²¼¶û±í´ïÊ½???¾äµÄ±êºÅ
 {
 }
-void tree::gen_code(ostream &out) // ä½¿ç”¨è¯­æ³•æ ‘ç”Ÿæˆä»£ï¿½?
+void tree::gen_code(ostream &out) // Ê¹ÓÃ??·¨Ê÷Éú³É´ú??
 {
 }
-void tree::get_temp_var(Node *t) // è·å–è®¡ç®—è¿‡ç¨‹ä¸­çš„ä¸´æ—¶å˜é‡
+void tree::get_temp_var(Node *t) // »ñÈ¡¼ÆËã¹ı³Ì??µÄÁÙÊ±±ä??
 {
 }
-void tree::gen_decl(ostream &out, Node *t) // å˜é‡æ˜¯è¦å†™åœ¨å˜é‡åŒºçš„ï¼Œå› æ­¤è¦ä¸€æ¬¡å†™å¥½ï¼Œéœ€è¦éå†è¯­æ³•æ ‘
+void tree::gen_decl(ostream &out, Node *t) // ±äÁ¿??ÒªĞ´ÔÚ±äÁ¿ÇøµÄ£¬Òò??????Ò»´ÎĞ´ºÃ£¬ĞèÒª±éÀú???·¨Ê÷
 {
 }
-void tree::expr_gen_code(ostream &out, Node *t) // ç”Ÿæˆå¸ƒå°”è¡¨è¾¾å¼è¯­å¥çš„ä»£ç 
+void tree::expr_gen_code(ostream &out, Node *t) // Éú³É²¼¶û±í´ïÊ½???¾äµÄ´úÂë
 {
 }
-void tree::stmt_gen_code(ostream &out, Node *t) // ç”Ÿæˆè¡¨è¾¾å¼çš„ä»£ç 
+void tree::stmt_gen_code(ostream &out, Node *t) // Éú³É±í´ïÊ½µÄ´úÂë
 {
 }
 
@@ -89,11 +89,11 @@ string generate_expr_code(Node *node1, Node *node2, string op)
 {
     string ret = "\tmov eax, " + temp_table[node1->it] + "\n";
     // ret+= + "\tmov ebx, " + temp_table[node2->it] + "\n"
-    // å…¶å®ç¬¬äºŒä¸ªå˜é‡å®Œå…¨ä¸ç”¨åŠ è½½ï¼Œå› ä¸ºæ”¯æŒç¬¬äºŒä¸ªåœ°å€åœ¨å†…ï¿½?
+    // ÆäÊµ??¶ş¸ö±äÁ¿ÍêÈ«²»ÓÃ¼ÓÔØ£¬ÒòÎªÖ§³Ö???¶ş¸öµØÖ·ÔÚÄÚ???
     ret += "\t";
     if (op == "-")
     {
-        //æµ®ç‚¹æ•°æ˜¯å¦å¤–ä¸€å¥—å¯„å­˜å™¨, ä½†æ˜¯æµ®ç‚¹æ•°åªéœ€è¦æ”¯æŒåŠ å‡ä¹˜ï¿½?
+        //??µãÊı??Áí???Ò»Ì×¼Ä´æÆ÷, µ«ÊÇ??µãÊı??ĞèÒªÖ§³Ö¼Ó¼õ³Ë???
         ret += "sub eax, " + temp_table[node2->it] + "\n";
     }
     else if (op == "+")
@@ -106,14 +106,14 @@ string generate_expr_code(Node *node1, Node *node2, string op)
     }
     else if (op == "/")
     {
-        // ä½™æ•°ç»“æœä¿å­˜åœ¨edx?
+        // ÓàÊı½á¹û±£´æÔÚedx?
         ret += "mov edx, 0\n\t";
         ret += "mov ebx, " + temp_table[node2->it] + "\n";
         ret += "idiv ebx\n";
     }
     else if (op == "%")
     {
-        // ä½™æ•°çš„ç»“æœä¿å­˜åœ¨edxï¿½?
+        // ÓàÊıµÄ½á¹û±£´æÔÚedx???
         ret += "mov edx, 0\n\t";
         ret += "mov ebx, " + temp_table[node2->it] + "\n";
         ret += "idiv ebx\n";
@@ -130,11 +130,11 @@ string generate_expr_code(Node *node1, Node *node2, string op)
     {
         ret += "and eax, " + temp_table[node2->it] + "\n";
     }
-    // å¸¦ç­‰äºçš„è¿”å›å€¼ç›¸åŒï¼Œåªæ˜¯è¦ä¿®æ”¹å·¦æ“ä½œ
-    // éœ€è¦åŠ¨å·¦èŠ‚ç‚¹çš„åœ°å€
+    // ´øµÈÓÚµÄ·µ»ØÖµÏàÍ¬£¬????ÒªĞŞ¸Ä×ó²Ù×÷
+    // ĞèÒª¶¯×ó½ÚµãµÄµØÖ·
     else if (op == "=")
     {
-        // æ‹¿åˆ°node1çš„åœ¨ç¬¦å·è¡¨ä¸­å­˜å‚¨çš„å˜é‡å
+        // ÄÃµ½node1µÄÔÚ·ûºÅ±íÖĞ´æ´¢µÄ±äÁ¿Ãû
         ret += "mov ebx, " + temp_table[node2->it];
         ret += "mov " + node1->name + ", ebx\n";
     }
@@ -205,14 +205,14 @@ string generate_expr_code(Node *node1, Node *node2, string op)
         ret += "sal eax, cl\n";
     }
     if (op == "%")
-        ret += "\tmov " + glbtemp[$1->it] + ", edx\n";
-    ret += "\tmov " + glbtemp[$1->it] + ", eax\n";
+        ret += "\tmov " + temp_table[node1->it] + ", edx\n";
+    ret += "\tmov " + temp_table[node1->it] + ", eax\n";
     return ret;
 }
 
 string generate_double_code(Node *node1, Node *node2, string op)
 {
-    // ç”Ÿæˆæµ®ç‚¹æ•°ä»£ç ?
+    // Éú³É??µãÊı´ú??
     string ret = "\tfld " + temp_table[node1->it] + "\n";
     if (op == "+")
     {
@@ -236,43 +236,42 @@ string generate_double_code(Node *node1, Node *node2, string op)
     }
     else if (op == "=")
     {
-        // å…ˆæŠŠnode1å¼¹å‡º, å†å‹å…¥node2ï¼ŒæŠŠnode2çš„å€¼èµ‹ç»™node1
+        // ÏÈ°Ñnode1µ¯³ö, ÔÙÑ¹??node2£¬°Ñnode2µÄÖµ¸³¸ønode1
         ret += "fstp " + node1->name + "\n";
         ret += "\tfld " + temp_table[node2->it] + "\n\t";
         ret += "fstp " + node2->name + "\n";
     }
-    // fst åªå­˜å‚¨st(0)å¯„å­˜å™¨çš„ï¿½?
-    ret += "\t fstp" + glbtemp[$1->it] "\n";
+    ret += "\t fstp" + temp_table[node1->it] + "\n";
     return ret;
 }
 
-// å‰ç¼€å•ç›®è¡¨è¾¾å¼
+// Ç°×ºµ¥Ä¿±í´ï???
 string generate_pre_code(Node *node, string op)
 {
     string ret = "\t mov eax, " + temp_table[node->it] + "\n";
     if (op == "&")
     {
-        // å–åœ°å€
+        // È¡µØÖ·
     }
     else if (op == "*")
     {
-        // å–å€¼
+        // È¡??
     }
     else if (op == "-")
     {
-        // å–å
+        // È¡·´
         ret += "\tmov ebx, eax\n\tmov eax, 0\n";
         ret += "\tsub eax, ebx\n";
     }
     else if (op == "~")
     {
-        // æŒ‰ä½å–å
+        // °´Î»È¡·´
         ret +="\tnot eax\n";
     }
     else if (op == "!")
     {
-        // é€»è¾‘é
-        //å…ˆä¸å®ç°
+        // Âß¼­???
+        //ÏÈ²»ÊµÏÖ
     }
     else if (op == "++")
     {
@@ -286,7 +285,7 @@ string generate_pre_code(Node *node, string op)
     ret += "\tmov " + node->name + ", eax\n";
     return ret;
 }
-// åç¼€å•ç›®è¡¨è¾¾å¼
+// ºó×ºµ¥Ä¿±í´ï???
 string generate_post_code(Node *node, string op)
 {
     string ret = "\t mov eax, " + temp_table[node->it] + "\n";
@@ -298,7 +297,7 @@ string generate_post_code(Node *node, string op)
     {
         ret += "\tdec eax]\n";
     }
-    // åç¼€è¡¨è¾¾å¼è¿”å›ä¹‹å‰çš„å€¼å°±è¡Œäº†
+    // ºó×º±í´ïÊ½·µ»ØÖ®Ç°µÄÖµ¾ÍĞĞÁË
     ret += "\tmov " + node->name + ", eax\n";
     return ret;
 }

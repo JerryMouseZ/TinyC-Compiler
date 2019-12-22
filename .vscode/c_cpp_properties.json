@@ -1,0 +1,24 @@
+{
+    "configurations": [
+        {
+            "name": "MinGW",
+            "includePath": [
+                "D:/LLVM/include/*",
+                "D:/LLVM/lib/gcc/x86_64-w64-mingw32/8.1.0/include/*",
+                "D:/LLVM/x86_64-w64-mingw32/include/*",
+                "${workspaceFolder}/**"
+            ],
+            "defines": [
+                "_DEBUG",
+                "UNICODE",
+                "_UNICODE"
+            ],
+            "windowsSdkVersion": "10.0.18362.0",
+            "compilerPath": "D:/LLVM/bin/g++.exe",
+            "cStandard": "c11",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "msvc-x64"
+        }
+    ],
+    "version": 4
+}
