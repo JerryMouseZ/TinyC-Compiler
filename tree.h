@@ -44,11 +44,6 @@ enum State
     Not_Init,
     Dup_Def
 };                         
-union Value {
-    double fvalue;
-    int ivalue;
-    char cvalue;
-};
 extern vector<string> temp_table; 
 extern int temp_top;
 extern int max_top;
@@ -57,7 +52,8 @@ struct VarEntry
 {
     string name;
     VALUE_TYPE type;
-    Value value;
+    int ivalue;
+    double fvalue;
     State state;
 };
 // 结构就不给初始化函数了
@@ -78,7 +74,7 @@ struct FuncEntry
 struct PointerEntry{
     string name;// 变量名
     VALUE_TYPE type;//变量类型 只允许常规类型
-    Value value;//初始值
+    void *value;// 初始值
     State state;// 状态
     int depth;// 指针的层数
 };
@@ -100,7 +96,8 @@ public:
     string name;       //ID名字
     Node *children[4]; 
     Node *sibing;
-    Value value;   // value只有常量会有
+    int ivalue;
+    double fvalue;
     string svalue;
     bool has_value; // 判断value的值是否有效
 
@@ -125,3 +122,6 @@ string generate_post_code(Node *node, string op);
 
 string generate_var_define();
 string generate_header();
+
+void printVarTable();
+void copyValue(Node *node1, Node *node2);

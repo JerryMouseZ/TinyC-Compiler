@@ -9,7 +9,10 @@ Node::Node()
     sibing = NULL;
     state = Valid;
     v_type = None;
+    has_value = false;
     it = -1;
+    ivalue = 0;
+    fvalue = 0;
     // value只能赋值一次，就不做初始化了
 }
 Node *check_type(char *id)
@@ -84,6 +87,7 @@ Node *generate_const_node()
     Node *ret = NULL;
     ret = new Node();
     ret->nd_type = CONS_t;
+    ret->has_value = true;
     return ret;
 }
 Node *generate_ID_node()
@@ -101,7 +105,7 @@ string generate_expr_code(Node *node1, Node *node2, string op)
         if (node1->nd_type == ID_t)
             op1 = node1->name;
         else
-            op1 = to_string(node1->value.fvalue);
+            op1 = to_string(node1->fvalue);
     }
     else
     {
@@ -112,7 +116,7 @@ string generate_expr_code(Node *node1, Node *node2, string op)
     string op2;
     if (node2->it == -1)
     {
-        op2 = to_string(node2->value.fvalue);
+        op2 = to_string(node2->ivalue);
     }
     else
     {
@@ -140,14 +144,14 @@ string generate_expr_code(Node *node1, Node *node2, string op)
         // 余数结果保存在edx?
         ret += "mov edx, 0\n\t";
         ret += "mov ebx, " + op2 + "\n";
-        ret += "idiv ebx\n";
+        ret += "\tidiv ebx\n";
     }
     else if (op == "%")
     {
         // 余数的结果保存在edx???
         ret += "mov edx, 0\n\t";
         ret += "mov ebx, " + op2 + "\n";
-        ret += "idiv ebx\n";
+        ret += "\tidiv ebx\n";
     }
     else if (op == "^")
     {
@@ -166,80 +170,80 @@ string generate_expr_code(Node *node1, Node *node2, string op)
     else if (op == "=")
     {
         // 拿到node1的在符号表中存储的变量名
-        ret += "mov ebx, " + op2;
-        ret += "mov " + op1 + ", ebx\n";
+        ret += "mov ebx, " + op2 + "\n";
+        ret += "\tmov " + op1 + ", ebx\n";
     }
     else if (op == ">>=")
     {
         ret += "\tmov ecx, " + op2;
-        ret += "sar eax, cl\n";
-        ret += "mov " + op1 + ", eax\n";
+        ret += "\tsar eax, cl\n";
+        ret += "\tmov " + op1 + ", eax\n";
     }
     else if (op == "<<=")
     {
         ret += "\tmov ecx, " + op2;
-        ret += "sal eax, cl\n";
-        ret += "mov " + op1 + ", eax\n";
+        ret += "\tsal eax, cl\n";
+        ret += "\tmov " + op1 + ", eax\n";
     }
     else if (op == "+=")
     {
         ret += "add eax, " + op2 + "\n";
-        ret += "mov " + op1 + ", eax\n";
+        ret += "\tmov " + op1 + ", eax\n";
     }
     else if (op == "-=")
     {
         ret += "sub eax, " + op2 + "\n";
-        ret += "mov " + op1 + ", eax\n";
+        ret += "\tmov " + op1 + ", eax\n";
     }
     else if (op == "*=")
     {
         ret += "imul eax, " + op2 + "\n";
-        ret += "mov " + op1 + ", eax\n";
+        ret += "\tmov " + op1 + ", eax\n";
     }
     else if (op == "/=")
     {
         ret += "mov edx, 0\n\t";
         ret += "mov ebx, " + op2 + "\n";
-        ret += "idiv ebx\n";
-        ret += "mov " + op1 + ", eax\n";
+        ret += "\tidiv ebx\n";
+        ret += "\tmov " + op1 + ", eax\n";
     }
     else if (op == "%=")
     {
         ret += "mov edx, 0\n\t";
         ret += "mov ebx, " + op2 + "\n";
-        ret += "idiv ebx\n";
-        ret += "mov " + op1 + ", edx\n";
+        ret += "\tidiv ebx\n";
+        ret += "\tmov " + op1 + ", edx\n";
     }
     else if (op == "&=")
     {
         ret += "and eax, " + op2 + "\n";
-        ret += "mov " + op1 + ", eax\n";
+        ret += "\tmov " + op1 + ", eax\n";
     }
     else if (op == "^=")
     {
         ret += "xor eax, " + op2 + "\n";
-        ret += "mov " + op1 + ", eax\n";
+        ret += "\tmov " + op1 + ", eax\n";
     }
     else if (op == "|=")
     {
         ret += "or eax, " + op2 + "\n";
-        ret += "mov " + op1 + ", eax\n";
+        ret += "\tmov " + op1 + ", eax\n";
     }
     else if (op == ">>")
     {
         ret += "\tmov ecx, " + op2;
-        ret += "sar eax, cl\n";
+        ret += "\tsar eax, cl\n";
     }
     else if (op == "<<")
     {
         ret += "\tmov ecx, " + op2;
-        ret += "sal eax, cl\n";
+        ret += "\tsal eax, cl\n";
     }
     temp_top++;
     if (temp_top > max_top)
     {
         max_top++;
-        temp_table[temp_top] = "temp_" + to_string(temp_top);
+        temp_table.push_back("temp_" + to_string(max_top));
     }
     // 取模的运算结构在edx中，否则在eax中
     if (op == "%")
@@ -258,19 +262,23 @@ string generate_double_code(Node *node1, Node *node2, string op)
     {
         if (node1->nd_type == ID_t)
             op1 = node1->name;
-        else
-            op1 = to_string(node1->value.fvalue);
+        else{
+            cout << "不允许不是初始值的浮点数常量!" << endl;
+        }
     }
     else
     {
         op1 = temp_table[node1->it];
         temp_top--;
     }
-    ret += "\t mov eax, " + op1 + "\n";
+    ret += "\tfld " + op1 + "\n";
     string op2;
     if (node2->it == -1)
     {
-        op2 = to_string(node2->value.fvalue);
+        if (node2->nd_type == ID_t)
+            op2 = node1->name;
+        else
+            cout << "不允许不是初始值的浮点数常量!" << endl;
     }
     else
     {
@@ -309,33 +317,33 @@ string generate_double_code(Node *node1, Node *node2, string op)
         ret += "\tfld " + op2 + "\n\t";
         ret += "fadd\n";
         // 不弹出的存储
-        ret += "fst " + node1->name + "\n";
+        ret += "\tfst " + node1->name + "\n";
     }
     else if (op == "-=")
     {
         ret += "\tfld " + op2 + "\n\t";
         ret += "fsub\n";
-        ret += "fst " + node1->name + "\n";
+        ret += "\tfst " + node1->name + "\n";
     }
     else if (op == "*=")
     {
         ret += "\tfld " + op2 + "\n\t";
         ret += "fmul\n";
-        ret += "fst " + node1->name + "\n";
+        ret += "\tfst " + node1->name + "\n";
     }
     else if (op == "/=")
     {
         ret += "\tfld " + op2 + "\n\t";
         ret += "fdiv\n";
-        ret += "fst " + node1->name + "\n";
+        ret += "\tfst " + node1->name + "\n";
     }
     temp_top++;
     if (temp_top > max_top)
     {
         max_top++;
-        temp_table[temp_top] = "temp_" + to_string(temp_top);
+        temp_table.push_back("temp_" + to_string(max_top));
     }
-    ret += "\t fstp" + temp_table[temp_top] + "\n";
+    ret += "\tfstp " + temp_table[temp_top] + "\n";
     return ret;
 }
 
@@ -359,7 +367,7 @@ string generate_pre_code(Node *node, string op)
         op1 = temp_table[node->it];
         temp_top--;
     }
-    ret += "\t mov eax, " + op1 + "\n";
+    ret += "\tmov eax, " + op1 + "\n";
     if (op == "&")
     {
         // 取地址
@@ -398,7 +406,7 @@ string generate_pre_code(Node *node, string op)
     if (temp_top > max_top)
     {
         max_top++;
-        temp_table[max_top] = "temp_" + to_string(max_top);
+        temp_table.push_back("temp_" + to_string(max_top));
     }
     ret += "\tmov " + temp_table[temp_top] + ", eax\n";
     return ret;
@@ -422,7 +430,7 @@ string generate_post_code(Node *node, string op)
         op1 = temp_table[node->it];
         temp_top--;
     }
-    ret += "\t mov eax, " + op1 + "\n";
+    ret += "\tmov eax, " + op1 + "\n";
 
     if (op == "++")
     {
@@ -437,7 +445,7 @@ string generate_post_code(Node *node, string op)
     if (temp_top > max_top)
     {
         max_top++;
-        temp_table[max_top] = "temp_" + to_string(max_top);
+        temp_table.push_back("temp_" + to_string(max_top));
     }
     ret += "\tmov " + temp_table[temp_top] + ", eax\n";
     return ret;
@@ -450,22 +458,22 @@ string generate_var_define()
     for (; i != Var_Table.end(); i++)
     {
         VarEntry entry = i->second;
-        ret += "\t" + entry.name + " ";
+        ret += "\t" + entry.name + "\t\t";
         if (entry.type == Double)
-            ret += "real8 ";
+            ret += "real8\t";
         else
         {
-            ret += "dd ";
+            ret += "dd\t\t";
         }
-        if (entry.state = Valid)
+        if (entry.state == Valid)
         {
             switch (entry.type)
             {
             case Double:
-                ret += to_string(entry.value.fvalue) + "\n";
+                ret += to_string(entry.fvalue) + "\n";
                 break;
             default:
-                ret += to_string(entry.value.ivalue) + "\n";
+                ret += to_string(entry.ivalue) + "\n";
                 break;
             }
         }
@@ -474,28 +482,50 @@ string generate_var_define()
             ret += "?\n";
         }
     }
-    for (int i = 0; i < max_top; i++)
+    for (int i = 0; i <= max_top; i++)
     {
         // 打印临时变量表
-        ret += "\t" + temp_table[i] + "\tdd ?\n";
+        ret += "\t" + temp_table[i] + "\tdd\t\t?\n";
     }
+    ret += ".code\n";
+    //    .code
+    ret += "start:\n\tcall main\n";
     return ret;
 }
 
 string generate_header()
 {
     string ret;
-    ret+= "\t.586\n";
-    ret+= "\t.model flat, stdcall\n";
-    ret+= "\toption casemap :none\n";
-    ret+= "\n";
-    ret+= "\tinclude \\masm32\\include\\windows.inc\n";
-    ret+= "\tinclude \\masm32\\include\\user32.inc\n";
-    ret+= "\tinclude \\masm32\\include\\kernel32.inc\n";
-    ret+= "\tinclude \\masm32\\include\\masm32.inc\n";
-    ret+= "\n";
-    ret+= "\tincludelib \\masm32\\lib\\user32.lib\n";
-    ret+= "\tincludelib \\masm32\\lib\\kernel32.lib\n";
-    ret+= "\tincludelib \\masm32\\lib\\masm32.lib\n";
+    ret += "\t.586\n";
+    ret += "\t.model flat, stdcall\n";
+    ret += "\toption casemap :none\n";
+    ret += "\n";
+    ret += "\tinclude \\masm32\\include\\windows.inc\n";
+    ret += "\tinclude \\masm32\\include\\user32.inc\n";
+    ret += "\tinclude \\masm32\\include\\kernel32.inc\n";
+    ret += "\tinclude \\masm32\\include\\masm32.inc\n";
+    ret += "\n";
+    ret += "\tincludelib \\masm32\\lib\\user32.lib\n";
+    ret += "\tincludelib \\masm32\\lib\\kernel32.lib\n";
+    ret += "\tincludelib \\masm32\\lib\\masm32.lib\n";
     return ret;
+}
+
+void printVarTable()
+{
+    auto begin = Var_Table.begin();
+    while (begin != Var_Table.end())
+    {
+        cout << begin->second.name << endl;
+        begin++;
+    }
+}
+
+void copyValue(Node *node1, Node *node2)
+{
+    node1->ivalue = node2->ivalue;
+    node1->fvalue = node2->fvalue;
+    node1->svalue = node2->svalue;
+    node1->has_value = node2->has_value;
+    node1->v_type = node2->v_type;
 }

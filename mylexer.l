@@ -14,7 +14,6 @@ extern Node* generate_const_node();
 extern enum VALUE_TYPE;
 extern enum ID_TYPE;
 extern enum NODE_TYPE;
-extern union Value;
 unordered_map<string, string> ID_Table;
 unordered_map<string, VarEntry> Var_Table;
 unordered_map<string, StructEntry> Struct_Table;
@@ -99,7 +98,7 @@ E			([Ee][+-]?{D}+)
 							ss>>hex>>temp;
 							yylval = generate_const_node();
 							yylval->v_type = Integer;
-							yylval->value.ivalue = temp;
+							yylval->ivalue = temp;
 							return(CONSTANT);
 						}
 0[0-7]*					{ 
@@ -110,7 +109,7 @@ E			([Ee][+-]?{D}+)
 							ss>>oct>>temp;
 							yylval = generate_const_node();
 							yylval->v_type = Integer;
-							yylval->value.ivalue = temp;
+							yylval->ivalue = temp;
 							return(CONSTANT); 
 						}
 [1-9]{D}*				{ 
@@ -121,10 +120,15 @@ E			([Ee][+-]?{D}+)
 							ss>>dec>>temp;
 							yylval = generate_const_node();
 							yylval->v_type = Integer;
-							yylval->value.ivalue = temp;
+							yylval->ivalue = temp;
 							return(CONSTANT); 
 						}
-
+'(\\.|[^\\'\n])+'		{ 
+							yylval = generate_const_node();
+							yylval->v_type = Char;
+							yylval->ivalue = yytext[1];
+							return(CONSTANT); 
+						}
 
 {D}+{E}					{ 
 							// 3e8 科学计数法
@@ -134,7 +138,7 @@ E			([Ee][+-]?{D}+)
 							ss>>temp;
 							yylval = generate_const_node();
 							yylval->v_type = Double;
-							yylval->value.fvalue = temp;
+							yylval->fvalue = temp;
 							return(CONSTANT); 
 						}
 {D}*"."{D}+{E}?			{ 
@@ -145,7 +149,7 @@ E			([Ee][+-]?{D}+)
 							ss>>temp;
 							yylval = generate_const_node();
 							yylval->v_type = Double;
-							yylval->value.fvalue = temp;
+							yylval->fvalue = temp;
 							return(CONSTANT); 
 						}
 
@@ -162,7 +166,7 @@ L?\"(\\.|[^\\"\n])*\"	{
 							yylval->v_type = String;
 							return(STRING_LITERAL); 
 						}
-			
+\'[a-zA-Z]
 
 ">>="			{ return(RIGHT_ASSIGN); }
 "<<="			{ return(LEFT_ASSIGN); }

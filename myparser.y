@@ -13,7 +13,7 @@ using namespace std;
 
 string temp_operator;
 extern int line;
-int temp_top = 0;
+int temp_top = -1;
 int max_top = -1;
 vector<string> temp_table; 
 %}
@@ -500,28 +500,11 @@ declaration
 		while(temp != NULL){
 			ID_Table[temp->name] = "VAR";
 			VarEntry entry;
-			entry.name = $1->name;
+			entry.name = temp->name;
 			entry.type = $1->v_type;
-			Value value;
-			if(temp->has_value){
-				switch(entry.type){
-					case Integer:
-						value.ivalue = temp->value.ivalue;
-						break;
-					case Double:
-						value.fvalue = temp->value.fvalue;
-						break;
-					case Char:
-						value.cvalue =  temp->value.cvalue;
-						break;
-					case Boolean:
-					 	value.ivalue = temp->value.ivalue;
-						break;
-					default:
-						cout<<"error at line: "<<line<<endl;
-				}
-				entry.value = value;
-			}
+			entry.ivalue = temp->ivalue;
+			entry.fvalue = temp->fvalue;
+			entry.state = temp->state;
 			Var_Table[temp->name] = entry;
 			// 需要额外初始化的代码加上
 			$$->code += temp->code;
@@ -538,7 +521,13 @@ declaration_specifiers
 
 init_declarator_list
 	: init_declarator {$$ = $1; }
-	| init_declarator_list ',' init_declarator
+	| init_declarator_list ',' init_declarator {
+		$$ = $1;
+		Node*temp = $$;
+		while(temp->sibing !=NULL)
+			temp = temp->sibing;
+		temp->sibing = $3;
+	}
 	;
 
 init_declarator
@@ -553,21 +542,18 @@ init_declarator
 		// 如果用常量初始化，则$3->has_value=true
 		if($3->has_value){
 			$$ = $1;
-			$$->has_value = true;
-			$$->value = $3->value;
-			$$->svalue = $3->svalue;
+			copyValue($$, $3);
 			$$->state = Valid;
 		}
 		else{
 			// 否则生成赋值语句的代码
 			$$->code = $3->code; // 先把计算结果的代码加上
 			if($3->v_type == Double)
-				$$->code += generate_double_code($1,$3,"-");
+				$$->code += generate_double_code($1, $3,"-");
 			else
-				$$->code += generate_expr_code($1,$3,"-");
+				$$->code += generate_expr_code($1, $3,"-");
 			$$->it = temp_top;
-			// 规约了两个临时变量，需要返还一个
-			
+			$$->state = Valid;
 		}
 
 	}
@@ -639,7 +625,7 @@ declarator
 direct_declarator
 	: IDENTIFIER {
 		$$ = $1;
-		cout<< "声明语句标识符"<<endl;
+		// cout<< "声明语句标识符"<<endl;
 	}
 	| '(' declarator ')'
 	| direct_declarator '[' assignment_expression ']'
@@ -753,7 +739,10 @@ block_item_list
 	| block_item_list block_item {
 		// 要串起来
 		$$ = $1;
-		$$->sibing = $2;
+		Node*temp = $$;
+		while(temp->sibing != NULL)
+			temp = temp->sibing;
+		temp->sibing = $2;
 	}
 	;
 
@@ -792,7 +781,12 @@ jump_statement
 	;
 
 translation_unit
-	: external_declaration {cout<<$1->code;}
+	: external_declaration {
+		cout<<generate_header();
+		cout<<generate_var_define();
+		cout<<$1->code;
+		cout<<"end start"<<endl;
+	}
 	| translation_unit external_declaration 
 	;
 
@@ -810,7 +804,8 @@ function_definition
 		$$ = generate_stmt_node();
 		$$->code += $2->name + " proc\n";
 		$$->code += $3->code;
-		cout<<$$->code;
+		$$->code += "\tret\n";
+		$$->code += $2->name + " endp\n";
 	}			
 	;
 
@@ -854,9 +849,9 @@ int main(int argc, char*argv[])
 			// 最后测试成功了以后再改文件
 			// lexer.yyin = new ifstream(argv[1]);
 			// lexer.yyout = new ofstream(argv[2]);
+			ofstream outf("out.txt");
+			cout.rdbuf(outf.rdbuf());
 			n = parser.yyparse();
-			cout<<generate_header();
-			cout<<generate_var_define();
 			// parse_tree.get_label();
 			// parse_tree.gen_code(*lexer.yyout);
 		}
