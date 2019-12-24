@@ -13,6 +13,8 @@ Node::Node()
     it = -1;
     ivalue = 0;
     fvalue = 0;
+    label = -1;
+    // next_label = -1;
     // value只能赋值一次，就不做初始化了
 }
 Node *check_type(char *id)
@@ -66,6 +68,11 @@ Node *generate_stmt_node()
     Node *ret = NULL;
     ret = new Node();
     ret->nd_type = STMT_t;
+    if(label_need){
+        label_need = false;
+        ret->label = next_label;
+        ret->code = "L" + to_string(next_label) + ":\n";
+    }
     return ret;
 }
 Node *generate_null_node()
@@ -170,8 +177,8 @@ string generate_expr_code(Node *node1, Node *node2, string op)
     else if (op == "=")
     {
         // 拿到node1的在符号表中存储的变量名
-        ret += "mov ebx, " + op2 + "\n";
-        ret += "\tmov " + op1 + ", ebx\n";
+        ret += "mov eax, " + op2 + "\n";
+        ret += "\tmov " + op1 + ", eax\n";
     }
     else if (op == ">>=")
     {

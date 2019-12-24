@@ -15,6 +15,9 @@ string temp_operator;
 extern int line;
 int temp_top = -1;
 int max_top = -1;
+int label_number=0;
+int next_label = 0;
+bool label_need = false;
 vector<string> temp_table; 
 %}
 
@@ -88,14 +91,14 @@ postfix_expression
 	| postfix_expression INC_OP {
 		$$ = generate_expr_node();
 		$$->children[0] = $1;
-		$$->code = $1->code + generate_post_code($1, "++");
+		$$->code += $1->code + generate_post_code($1, "++");
 		$$->it = temp_top;
 		$$->v_type = $1->v_type;
 	}
 	| postfix_expression DEC_OP {
 		$$ = generate_expr_node();
 		$$->children[0] = $1;
-		$$->code = $1->code + generate_post_code($1, "--");
+		$$->code += $1->code + generate_post_code($1, "--");
 		$$->it = temp_top;
 		$$->v_type = $1->v_type;
 	}
@@ -115,21 +118,21 @@ unary_expression
 	| INC_OP unary_expression {
 		$$ = generate_expr_node();
 		$$->children[0] = $2;
-		$$->code = $2->code + generate_post_code($2, "++");
+		$$->code += $2->code + generate_post_code($2, "++");
 		$$->it = temp_top;
 		$$->v_type = $2->v_type;
 	}
 	| DEC_OP unary_expression {
 		$$ = generate_expr_node();
 		$$->children[0] = $2;
-		$$->code = $2->code + generate_post_code($2, "--");
+		$$->code += $2->code + generate_post_code($2, "--");
 		$$->it = temp_top;
 		$$->v_type = $2->v_type;
 	}
 	| unary_operator unary_expression {
 		$$ = generate_expr_node();
 		$$->children[0] = $2;
-		$$->code = $2->code + generate_pre_code($2, temp_operator);
+		$$->code += $2->code + generate_pre_code($2, temp_operator);
 		$$->it = temp_top;
 		$$->v_type = $2->v_type;
 	}
@@ -150,7 +153,7 @@ multiplicative_expression
 		$$->children[0] = $1;
 		$$->children[1] = $3;
 		$1->sibing = $3;
-		$$->code = $1->code + $3->code; // 先把孩子的代码加上
+		$$->code += $1->code + $3->code; // 先把孩子的代码加上
 		if($1->v_type != $3->v_type)
 		{
 			$$->state = Type_Err;
@@ -164,7 +167,6 @@ multiplicative_expression
 			$$->code += generate_expr_code($1,$3,"*");
 		$$->it = temp_top;
 		// 规约了两个临时变量，需要返还一个
-		
 	}
 	| multiplicative_expression '/' unary_expression {
 		$$ = generate_expr_node();
@@ -172,7 +174,7 @@ multiplicative_expression
 		$$->children[1] = $3;
 		$1->sibing = $3;
 
-		$$->code = $1->code + $3->code; // 先把孩子的代码加上
+		$$->code += $1->code + $3->code; // 先把孩子的代码加上
 		if($1->v_type != $3->v_type)
 		{
 			$$->state = Type_Err;
@@ -194,7 +196,7 @@ multiplicative_expression
 		$$->children[1] = $3;
 		$1->sibing = $3;
 
-		$$->code = $1->code + $3->code; // 先把孩子的代码加上
+		$$->code += $1->code + $3->code; // 先把孩子的代码加上
 		if($1->v_type != $3->v_type)
 		{
 			$$->state = Type_Err;
@@ -218,7 +220,7 @@ additive_expression
 		$$->children[1] = $3;
 		$1->sibing = $3;
 		// 下面根据+号给出语法制导翻译，翻译出二者的句子
-		$$->code = $1->code + $3->code; // 先把孩子的代码加上
+		$$->code += $1->code + $3->code; // 先把孩子的代码加上
 		if($1->v_type != $3->v_type)
 		{
 			$$->state = Type_Err;
@@ -235,7 +237,7 @@ additive_expression
 		
 	}
 	| additive_expression '-' multiplicative_expression {
-		$$->code = $1->code + $3->code; // 先把孩子的代码加上
+		$$->code += $1->code + $3->code; // 先把孩子的代码加上
 		if($1->v_type != $3->v_type)
 		{
 			$$->state = Type_Err;
@@ -261,7 +263,7 @@ shift_expression
 		$$->children[1] = $3;
 		$1->sibing = $3;
 
-		$$->code = $1->code + $3->code; // 先把孩子的代码加上
+		$$->code += $1->code + $3->code; // 先把孩子的代码加上
 		if($1->v_type != $3->v_type)
 		{
 			$$->state = Type_Err;
@@ -281,7 +283,7 @@ shift_expression
 		$$->children[1] = $3;
 		$1->sibing = $3;
 
-		$$->code = $1->code + $3->code; // 先把孩子的代码加上
+		$$->code += $1->code + $3->code; // 先把孩子的代码加上
 		if($1->v_type != $3->v_type)
 		{
 			$$->state = Type_Err;
@@ -348,7 +350,7 @@ and_expression
 		$$->children[1] = $3;
 		$1->sibing = $3;
 
-		$$->code = $1->code + $3->code; // 先把孩子的代码加上
+		$$->code += $1->code + $3->code; // 先把孩子的代码加上
 		if($1->v_type != $3->v_type)
 		{
 			$$->state = Type_Err;
@@ -371,7 +373,7 @@ exclusive_or_expression
 		$$->children[1] = $3;
 		$1->sibing = $3;
 
-		$$->code = $1->code + $3->code; // 先把孩子的代码加上
+		$$->code += $1->code + $3->code; // 先把孩子的代码加上
 		if($1->v_type != $3->v_type)
 		{
 			$$->state = Type_Err;
@@ -394,7 +396,7 @@ inclusive_or_expression
 		$$->children[1] = $3;
 		$1->sibing = $3;
 
-		$$->code = $1->code + $3->code; // 先把孩子的代码加上
+		$$->code += $1->code + $3->code; // 先把孩子的代码加上
 		if($1->v_type != $3->v_type)
 		{
 			$$->state = Type_Err;
@@ -447,7 +449,7 @@ assignment_expression
 		$$->children[1] = $3;
 		$1->sibing = $3;
 
-		$$->code = $1->code + $3->code; // 先把孩子的代码加上
+		$$->code += $1->code + $3->code; // 先把孩子的代码加上
 		if($1->v_type != $3->v_type)
 		{
 			$$->state = Type_Err;
@@ -455,14 +457,13 @@ assignment_expression
 		}
 		else
 			$$->v_type = $1->v_type;
-		$$->code = $1->code + $3->code; // 先把孩子的代码加上
+		$$->code += $1->code + $3->code; // 先把孩子的代码加上
 		if($3->v_type == Double)
 			$$->code += generate_double_code($1, $3, temp_operator);
 		else
 			$$->code += generate_expr_code($1, $3, temp_operator);
 		$$->it = temp_top;
 		// 规约了两个临时变量，需要返还一个
-		
 	}
 	;
 
@@ -483,7 +484,8 @@ assignment_operator
 expression
 	: assignment_expression {$$ = $1;}
 	| expression ',' assignment_expression {
-		//
+		// 和 list的处理方法一样
+
 	}
 	;
 
@@ -547,7 +549,7 @@ init_declarator
 		}
 		else{
 			// 否则生成赋值语句的代码
-			$$->code = $3->code; // 先把计算结果的代码加上
+			$$->code += $3->code; // 先把计算结果的代码加上
 			if($3->v_type == Double)
 				$$->code += generate_double_code($1, $3,"-");
 			else
@@ -716,7 +718,7 @@ statement
 	: compound_statement { $$ = $1;}
 	| expression_statement {$$ = $1;}
 	| selection_statement
-	| iteration_statement
+	| iteration_statement {$$ = $1;}
 	| jump_statement
 	;
 
@@ -754,23 +756,98 @@ block_item
 expression_statement
 	: ';'
 	| expression ';' {
-		$$ = generate_stmt_node();
-		$$->code = $1->code;
+		$$ = $1;
 	}
 	;
 
 selection_statement
-	: IF '(' expression ')' statement
-	| IF '(' expression ')' statement ELSE statement
+	: IF '(' expression ')' statement {
+
+	}
+	| IF '(' expression ')' statement ELSE statement {
+
+	}
 	;
 
 iteration_statement
 	: WHILE '(' expression ')' statement
 	| DO statement WHILE '(' expression ')' ';'
-	| FOR '(' expression_statement expression_statement ')' statement
-	| FOR '(' expression_statement expression_statement expression ')' statement
-	| FOR '(' declaration expression_statement ')' statement
-	| FOR '(' declaration expression_statement expression ')' statement
+	| FOR '(' expression_statement expression_statement ')' statement {
+		$$ = generate_stmt_node();
+		$$->children[0] = $3;
+		$$->children[1] = $4;
+		// 循环一般需要两个标签
+		$$->code += $3->code;
+		$$->code += "\tjmp L" + to_string(label_number+1) + "\n";
+		// 接下来应该是正式运行的代码
+		$$->code += "L" + to_string(label_number) + ":\n";
+		$$->code += $6->code;
+		$$->code += "\tjmp L" + to_string(label_number+1) + "\n";
+		label_number++;
+		$$->code += "L" + to_string(label_number) + ":\n";
+		$$->code += $4->code;
+		$$->code += "\tcmp "+ temp_table[$4->it] +", 0\n";
+		$$->code += "\tje L" + to_string(label_number-1) + "\n";
+		label_number++;
+	}
+	| FOR '(' expression_statement expression_statement expression ')' statement {
+		$$ = generate_stmt_node();
+		$$->children[0] = $3;
+		$$->children[1] = $4;
+		// 循环一般需要两个标签
+		$$->code += $3->code;
+		$$->code += "\tjmp L" + to_string(label_number+1) + "\n";
+		// 接下来应该是正式运行的代码
+		// 正式运行的代码要加$5
+		$$->code += "L" + to_string(label_number) + ":\n";
+		$$->code += $7->code;
+		$$->code += $5->code;
+		$$->code += "\tjmp L" + to_string(label_number+1) + "\n";
+		label_number++;
+		$$->code += "L" + to_string(label_number) + ":\n";
+		$$->code += $4->code;
+		$$->code += "\tcmp "+ temp_table[$4->it] +", 0\n";
+		$$->code += "\tje L" + to_string(label_number-1) + "\n";
+		label_number++;
+	}
+	| FOR '(' declaration expression_statement ')' statement {
+		$$ = generate_stmt_node();
+		$$->children[0] = $3;
+		$$->children[1] = $4;
+		// 循环一般需要两个标签
+		$$->code += $3->code;
+		$$->code += "\tjmp L" + to_string(label_number+1) + "\n";
+		// 接下来应该是正式运行的代码
+		$$->code += "L" + to_string(label_number) + ":\n";
+		$$->code += $6->code;
+		$$->code += "\tjmp L" + to_string(label_number+1) + "\n";
+		label_number++;
+		$$->code += "L" + to_string(label_number) + ":\n";
+		$$->code += $4->code;
+		$$->code += "\tcmp "+ temp_table[$4->it] +", 0\n";
+		$$->code += "\tje L" + to_string(label_number-1) + "\n";
+		label_number++;
+	}
+	| FOR '(' declaration expression_statement expression ')' statement {
+		$$ = generate_stmt_node();
+		$$->children[0] = $3;
+		$$->children[1] = $4;
+		// 循环一般需要两个标签
+		$$->code += $3->code;
+		$$->code += "\tjmp L" + to_string(label_number+1) + "\n";
+		// 接下来应该是正式运行的代码
+		// 正式运行的代码要加$5
+		$$->code += "L" + to_string(label_number) + ":\n";
+		$$->code += $7->code;
+		$$->code += $5->code;
+		$$->code += "\tjmp L" + to_string(label_number+1) + "\n";
+		label_number++;
+		$$->code += "L" + to_string(label_number) + ":\n";
+		$$->code += $4->code;
+		$$->code += "\tcmp "+ temp_table[$4->it] +", 0\n";
+		$$->code += "\tje L" + to_string(label_number-1) + "\n";
+		label_number++;
+	}
 	;
 
 jump_statement
