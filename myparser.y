@@ -14,6 +14,7 @@ using namespace std;
 string temp_operator;
 extern int line;
 int temp_top = 0;
+int max_top = -1;
 vector<string> temp_table; 
 %}
 
@@ -63,7 +64,13 @@ vector<string> temp_table;
 
 %%
 primary_expression
-	: IDENTIFIER {$$ = $1;}
+	: IDENTIFIER {
+		// 类型检查
+		if($1->state == Not_Def){
+			cout<<"未定义标识符 "<<$1->name<<" at line "<<line<<endl;
+		}
+		$$ = $1;
+	}
 	| CONSTANT	{$$ = $1;}
 	| STRING_LITERAL {$$ = $1;}
 	| '(' expression ')' {$$ = $2;}
@@ -81,15 +88,15 @@ postfix_expression
 	| postfix_expression INC_OP {
 		$$ = generate_expr_node();
 		$$->children[0] = $1;
-		$$->code = $1->code + generate_post_code($1,"++");
-		$$->it = $1->it;
+		$$->code = $1->code + generate_post_code($1, "++");
+		$$->it = temp_top;
 		$$->v_type = $1->v_type;
 	}
 	| postfix_expression DEC_OP {
 		$$ = generate_expr_node();
 		$$->children[0] = $1;
 		$$->code = $1->code + generate_post_code($1, "--");
-		$$->it = $1->it;
+		$$->it = temp_top;
 		$$->v_type = $1->v_type;
 	}
 	;
@@ -104,26 +111,26 @@ argument_expression_list
 	;
 
 unary_expression
-	: postfix_expression
+	: postfix_expression {$$ = $1;}
 	| INC_OP unary_expression {
 		$$ = generate_expr_node();
 		$$->children[0] = $2;
 		$$->code = $2->code + generate_post_code($2, "++");
-		$$->it = $2->it;
+		$$->it = temp_top;
 		$$->v_type = $2->v_type;
 	}
 	| DEC_OP unary_expression {
 		$$ = generate_expr_node();
 		$$->children[0] = $2;
 		$$->code = $2->code + generate_post_code($2, "--");
-		$$->it = $2->it;
+		$$->it = temp_top;
 		$$->v_type = $2->v_type;
 	}
 	| unary_operator unary_expression {
 		$$ = generate_expr_node();
 		$$->children[0] = $2;
 		$$->code = $2->code + generate_pre_code($2, temp_operator);
-		$$->it = $2->it;
+		$$->it = temp_top;
 		$$->v_type = $2->v_type;
 	}
 	;
@@ -152,12 +159,12 @@ multiplicative_expression
 		else
 			$$->v_type = $1->v_type;
 		if($1->v_type == Double)
-			$$->code += generate_double_code($1,$2,"*");
+			$$->code += generate_double_code($1,$3,"*");
 		else
-			$$->code += generate_expr_code($1,$2,"*");
-		$$->it = $3->it;
+			$$->code += generate_expr_code($1,$3,"*");
+		$$->it = temp_top;
 		// 规约了两个临时变量，需要返还一个
-		temp_top--;
+		
 	}
 	| multiplicative_expression '/' unary_expression {
 		$$ = generate_expr_node();
@@ -174,12 +181,12 @@ multiplicative_expression
 		else
 			$$->v_type = $1->v_type;
 		if($1->v_type == Double)
-			$$->code += generate_double_code($1,$2,"/");
+			$$->code += generate_double_code($1,$3,"/");
 		else
-			$$->code += generate_expr_code($1,$2,"/");
-		$$->it = $3->it;
+			$$->code += generate_expr_code($1,$3,"/");
+		$$->it = temp_top;
 		// 规约了两个临时变量，需要返还一个
-		temp_top--;
+		
 	}
 	| multiplicative_expression '%' unary_expression {
 		$$ = generate_expr_node();
@@ -196,10 +203,10 @@ multiplicative_expression
 		else
 			$$->v_type = $1->v_type;
 		
-		$$->code += generate_expr_code($1,$2,"%");
-		$$->it = $3->it;
+		$$->code += generate_expr_code($1,$3,"%");
+		$$->it = temp_top;
 		// 规约了两个临时变量，需要返还一个
-		temp_top--;
+		
 	}
 	;
 
@@ -220,12 +227,12 @@ additive_expression
 		else
 			$$->v_type = $1->v_type;
 		if($1->v_type == Double)
-			$$->code += generate_double_code($1,$2,"+");
+			$$->code += generate_double_code($1,$3,"+");
 		else
-			$$->code += generate_expr_code($1,$2,"+");
-		$$->it = $3->it;
+			$$->code += generate_expr_code($1,$3,"+");
+		$$->it = temp_top;
 		// 规约了两个临时变量，需要返还一个
-		temp_top--;
+		
 	}
 	| additive_expression '-' multiplicative_expression {
 		$$->code = $1->code + $3->code; // 先把孩子的代码加上
@@ -237,12 +244,12 @@ additive_expression
 		else
 			$$->v_type = $1->v_type;
 		if($1->v_type == Double)
-			$$->code += generate_double_code($1,$2,"-");
+			$$->code += generate_double_code($1,$3,"-");
 		else
-			$$->code += generate_expr_code($1,$2,"-");
-		$$->it = $3->it;
+			$$->code += generate_expr_code($1,$3,"-");
+		$$->it = temp_top;
 		// 规约了两个临时变量，需要返还一个
-		temp_top--;
+		
 	}
 	;
 
@@ -262,10 +269,10 @@ shift_expression
 		}
 		else
 			$$->v_type = $1->v_type;
-		$$->code += generate_expr_code($1,$2,"<<");
-		$$->it = $3->it;
+		$$->code += generate_expr_code($1,$3,"<<");
+		$$->it = temp_top;
 		// 规约了两个临时变量，需要返还一个
-		temp_top--;
+		
 
 	}
 	| shift_expression RIGHT_OP additive_expression {
@@ -282,10 +289,10 @@ shift_expression
 		}
 		else
 			$$->v_type = $1->v_type;
-		$$->code += generate_expr_code($1,$2,">>");
-		$$->it = $3->it;
+		$$->code += generate_expr_code($1,$3,">>");
+		$$->it = temp_top;
 		// 规约了两个临时变量，需要返还一个
-		temp_top--;
+		
 	}
 	;
 
@@ -349,10 +356,10 @@ and_expression
 		}
 		else
 			$$->v_type = $1->v_type;
-		$$->code += generate_expr_code($1,$2,"&");
-		$$->it = $3->it;
+		$$->code += generate_expr_code($1,$3,"&");
+		$$->it = temp_top;
 		// 规约了两个临时变量，需要返还一个
-		temp_top--;
+		
 	}
 	;
 
@@ -372,10 +379,10 @@ exclusive_or_expression
 		}
 		else
 			$$->v_type = $1->v_type;
-		$$->code += generate_expr_code($1,$2,"^");
-		$$->it = $3->it;
+		$$->code += generate_expr_code($1,$3,"^");
+		$$->it = temp_top;
 		// 规约了两个临时变量，需要返还一个
-		temp_top--;
+		
 	}
 	;
 
@@ -395,10 +402,10 @@ inclusive_or_expression
 		}
 		else
 			$$->v_type = $1->v_type;
-		$$->code += generate_expr_code($1,$2,"|");
-		$$->it = $3->it;
+		$$->code += generate_expr_code($1,$3,"|");
+		$$->it = temp_top;
 		// 规约了两个临时变量，需要返还一个
-		temp_top--;
+		
 	}
 	;
 
@@ -426,30 +433,58 @@ logical_or_expression
 assignment_expression
 	: logical_or_expression {$$ = $1;}
 	| unary_expression assignment_operator assignment_expression {
-		//怎么拿到变量的标识符呢
-		// $$ = new Node();
-		// $$->op = $2;
+		// 分两种情况，直接就是id或者是 *i= 或者是 &i = 
+		// 以及 a[i] = 
+		// 直接就是id
+		// if($1->name == ""){
+		// 	Node*temp = $1;
+		// 	while(temp->children[0] != NULL){
+		// 		temp = temp->children[0];
+		// 	}
+		// }
+		$$ = generate_expr_node();
+		$$->children[0] = $1;
+		$$->children[1] = $3;
+		$1->sibing = $3;
+
+		$$->code = $1->code + $3->code; // 先把孩子的代码加上
+		if($1->v_type != $3->v_type)
+		{
+			$$->state = Type_Err;
+			cout<<"error in line "<<line<<endl;
+		}
+		else
+			$$->v_type = $1->v_type;
+		$$->code = $1->code + $3->code; // 先把孩子的代码加上
+		if($3->v_type == Double)
+			$$->code += generate_double_code($1, $3, temp_operator);
+		else
+			$$->code += generate_expr_code($1, $3, temp_operator);
+		$$->it = temp_top;
+		// 规约了两个临时变量，需要返还一个
 		
 	}
 	;
 
 assignment_operator
-	: '='
-	| MUL_ASSIGN
-	| DIV_ASSIGN
-	| MOD_ASSIGN
-	| ADD_ASSIGN
-	| SUB_ASSIGN
-	| LEFT_ASSIGN
-	| RIGHT_ASSIGN
-	| AND_ASSIGN
-	| XOR_ASSIGN
-	| OR_ASSIGN
+	: '=' {temp_operator = "=";}
+	| MUL_ASSIGN {temp_operator = "*=";}
+	| DIV_ASSIGN {temp_operator = "/=";}
+	| MOD_ASSIGN {temp_operator = "%=";}
+	| ADD_ASSIGN {temp_operator = "+=";}
+	| SUB_ASSIGN {temp_operator = "-=";}
+	| LEFT_ASSIGN {temp_operator = "<<=";}
+	| RIGHT_ASSIGN {temp_operator = ">>=";}
+	| AND_ASSIGN {temp_operator = "&=";}
+	| XOR_ASSIGN {temp_operator = "^=";}
+	| OR_ASSIGN {temp_operator = "|=";}
 	;
 
 expression
-	: assignment_expression
-	| expression ',' assignment_expression
+	: assignment_expression {$$ = $1;}
+	| expression ',' assignment_expression {
+		//
+	}
 	;
 
 constant_expression
@@ -457,36 +492,94 @@ constant_expression
 	;
 
 declaration
-	: declaration_specifiers init_declarator_list ';'
+	: declaration_specifiers init_declarator_list ';' {
+		// 变量声明语句
+		// 遍历init_declarator_list, 把所有项加入符号表
+		$$ = generate_decl_node();
+		Node*temp = $2;
+		while(temp != NULL){
+			ID_Table[temp->name] = "VAR";
+			VarEntry entry;
+			entry.name = $1->name;
+			entry.type = $1->v_type;
+			Value value;
+			if(temp->has_value){
+				switch(entry.type){
+					case Integer:
+						value.ivalue = temp->value.ivalue;
+						break;
+					case Double:
+						value.fvalue = temp->value.fvalue;
+						break;
+					case Char:
+						value.cvalue =  temp->value.cvalue;
+						break;
+					case Boolean:
+					 	value.ivalue = temp->value.ivalue;
+						break;
+					default:
+						cout<<"error at line: "<<line<<endl;
+				}
+				entry.value = value;
+			}
+			Var_Table[temp->name] = entry;
+			// 需要额外初始化的代码加上
+			$$->code += temp->code;
+			temp = temp->sibing;
+		}
+		// 怎样保留那些需要复杂初始化的代码呢
+	}
 	;
 
 declaration_specifiers
-	: type_specifier
+	: type_specifier {$$ = $1;}
 	| type_specifier declaration_specifiers
 	;
 
 init_declarator_list
-	: init_declarator
+	: init_declarator {$$ = $1; }
 	| init_declarator_list ',' init_declarator
 	;
 
 init_declarator
 	: declarator {
 		// a
+		$$ = $1;
+		// 存入符号表，状态为未初始化
+		$$->state = Not_Init;
 	}
 	| declarator '=' initializer {
 		// a=1
-		//
+		// 如果用常量初始化，则$3->has_value=true
+		if($3->has_value){
+			$$ = $1;
+			$$->has_value = true;
+			$$->value = $3->value;
+			$$->svalue = $3->svalue;
+			$$->state = Valid;
+		}
+		else{
+			// 否则生成赋值语句的代码
+			$$->code = $3->code; // 先把计算结果的代码加上
+			if($3->v_type == Double)
+				$$->code += generate_double_code($1,$3,"-");
+			else
+				$$->code += generate_expr_code($1,$3,"-");
+			$$->it = temp_top;
+			// 规约了两个临时变量，需要返还一个
+			
+		}
+
 	}
 	;
 
 
 type_specifier
-	: VOID
-	| CHAR
-	| INT
-	| DOUBLE
-	| BOOL
+	: VOID {}
+	| CHAR {$$ = new Node();$$->v_type = Char;}
+	| INT {$$ = new Node();$$->v_type = Integer;}
+	| DOUBLE {$$ = new Node();$$->v_type = Double;}
+	| BOOL {$$ = new Node();$$->v_type = Boolean;}
 	| struct_or_union_specifier
 	| TYPE_NAME
 	;
@@ -538,13 +631,15 @@ declarator
 	}
 	| direct_declarator {
 		// a
+		$$ = $1;
 	}
 	;
 
 
 direct_declarator
 	: IDENTIFIER {
-
+		$$ = $1;
+		cout<< "声明语句标识符"<<endl;
 	}
 	| '(' declarator ')'
 	| direct_declarator '[' assignment_expression ']'
@@ -602,7 +697,10 @@ direct_abstract_declarator
 	;
 
 initializer
-	: assignment_expression
+	: assignment_expression {
+		// 秀啊，还用表达式来初始化，那初始化值就是没有的了
+		$$ = $1;
+	}
 	| '{' initializer_list '}'
 	| '{' initializer_list ',' '}'
 	;
@@ -629,8 +727,8 @@ designator
 	;
 
 statement
-	: compound_statement
-	| expression_statement
+	: compound_statement { $$ = $1;}
+	| expression_statement {$$ = $1;}
 	| selection_statement
 	| iteration_statement
 	| jump_statement
@@ -640,22 +738,36 @@ statement
 
 compound_statement
 	: '{' '}'
-	| '{' block_item_list '}'
+	| '{' block_item_list '}' {
+		$$ = generate_stmt_node();
+		Node*temp = $2;
+		while(temp != NULL){
+			$$->code += temp->code;
+			temp = temp->sibing;
+		}
+	}
 	;
 
 block_item_list
-	: block_item
-	| block_item_list block_item
+	: block_item {$$ = $1;}
+	| block_item_list block_item {
+		// 要串起来
+		$$ = $1;
+		$$->sibing = $2;
+	}
 	;
 
 block_item
-	: declaration
-	| statement
+	: declaration {$$ = $1;}
+	| statement {$$ = $1;}
 	;
 
 expression_statement
 	: ';'
-	| expression ';'
+	| expression ';' {
+		$$ = generate_stmt_node();
+		$$->code = $1->code;
+	}
 	;
 
 selection_statement
@@ -680,12 +792,12 @@ jump_statement
 	;
 
 translation_unit
-	: external_declaration
-	| translation_unit external_declaration
+	: external_declaration {cout<<$1->code;}
+	| translation_unit external_declaration 
 	;
 
 external_declaration
-	: function_definition
+	: function_definition {}
 	| declaration
 	;
 
@@ -694,7 +806,11 @@ function_definition
 
 	}
 	| declaration_specifiers declarator compound_statement {
-
+		// 无参函数定义
+		$$ = generate_stmt_node();
+		$$->code += $2->name + " proc\n";
+		$$->code += $3->code;
+		cout<<$$->code;
 	}			
 	;
 
@@ -739,6 +855,8 @@ int main(int argc, char*argv[])
 			// lexer.yyin = new ifstream(argv[1]);
 			// lexer.yyout = new ofstream(argv[2]);
 			n = parser.yyparse();
+			cout<<generate_header();
+			cout<<generate_var_define();
 			// parse_tree.get_label();
 			// parse_tree.gen_code(*lexer.yyout);
 		}

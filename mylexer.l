@@ -19,8 +19,10 @@ unordered_map<string, string> ID_Table;
 unordered_map<string, VarEntry> Var_Table;
 unordered_map<string, StructEntry> Struct_Table;
 unordered_map<string, FuncEntry> Fuction_Table;
-int line = 0;
+unordered_map<string, PointerEntry> Pointer_Table;
+int line = 1;
 void countline(char*dd);
+extern Node* check_type(char *id);
 %}
 
 /////////////////////////////////////////////////////////////////////////////
@@ -84,12 +86,8 @@ E			([Ee][+-]?{D}+)
 
 {L}({L}|{D})*			{ 
 							// 如果找到类型了，应当给这个标识符类型，否则就是空类型
-							// check_type(yytext);
-							yylval = new Node();
-							yylval->nd_type = ID_t;
-							yylval->v_type = None;
-							// ID的名字存储在了temp_name中
-							yylval->name = yytext;
+							yylval = check_type(yytext);
+							// ID的名字存储在了name中
 							return(IDENTIFIER); 
 						}
 
@@ -99,7 +97,7 @@ E			([Ee][+-]?{D}+)
 							ss<<yytext;
 							int temp;
 							ss>>hex>>temp;
-							yylval = generate_expr_node();
+							yylval = generate_const_node();
 							yylval->v_type = Integer;
 							yylval->value.ivalue = temp;
 							return(CONSTANT);
@@ -110,7 +108,7 @@ E			([Ee][+-]?{D}+)
 							ss<<yytext;
 							int temp;
 							ss>>oct>>temp;
-							yylval = generate_expr_node();
+							yylval = generate_const_node();
 							yylval->v_type = Integer;
 							yylval->value.ivalue = temp;
 							return(CONSTANT); 
@@ -121,7 +119,7 @@ E			([Ee][+-]?{D}+)
 							ss<<yytext;
 							int temp;
 							ss>>dec>>temp;
-							yylval = generate_expr_node();
+							yylval = generate_const_node();
 							yylval->v_type = Integer;
 							yylval->value.ivalue = temp;
 							return(CONSTANT); 
@@ -134,7 +132,7 @@ E			([Ee][+-]?{D}+)
 							ss<<yytext;
 							double temp;
 							ss>>temp;
-							yylval = generate_expr_node();
+							yylval = generate_const_node();
 							yylval->v_type = Double;
 							yylval->value.fvalue = temp;
 							return(CONSTANT); 
@@ -145,7 +143,7 @@ E			([Ee][+-]?{D}+)
 							ss<<yytext;
 							double temp;
 							ss>>temp;
-							yylval = generate_expr_node();
+							yylval = generate_const_node();
 							yylval->v_type = Double;
 							yylval->value.fvalue = temp;
 							return(CONSTANT); 
@@ -164,6 +162,7 @@ L?\"(\\.|[^\\"\n])*\"	{
 							yylval->v_type = String;
 							return(STRING_LITERAL); 
 						}
+			
 
 ">>="			{ return(RIGHT_ASSIGN); }
 "<<="			{ return(LEFT_ASSIGN); }
@@ -224,9 +223,6 @@ int yywrap(void)
 // 用来计算行号给出错误信息
 int column = 0;
 
-void check_type(char*id){
-	;
-}
 
 void countline(char * dd){
 	for(int i=0;dd[i]!=0;i++){
