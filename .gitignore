@@ -1,2 +1,8 @@
 /Compiler/*
 /.vscode/*
+*.v
+*.pgp
+*.pgw
+test.*
+*.asm
+*.exe
