@@ -166,7 +166,7 @@ multiplicative_expression
 		else
 			$$->code += generate_expr_code($1,$3,"*");
 		$$->it = temp_top;
-		// 规约了两个临时变量，需要返还一个
+
 	}
 	| multiplicative_expression '/' unary_expression {
 		$$ = generate_expr_node();
@@ -187,7 +187,7 @@ multiplicative_expression
 		else
 			$$->code += generate_expr_code($1,$3,"/");
 		$$->it = temp_top;
-		// 规约了两个临时变量，需要返还一个
+
 		
 	}
 	| multiplicative_expression '%' unary_expression {
@@ -207,7 +207,7 @@ multiplicative_expression
 		
 		$$->code += generate_expr_code($1,$3,"%");
 		$$->it = temp_top;
-		// 规约了两个临时变量，需要返还一个
+
 		
 	}
 	;
@@ -233,7 +233,7 @@ additive_expression
 		else
 			$$->code += generate_expr_code($1,$3,"+");
 		$$->it = temp_top;
-		// 规约了两个临时变量，需要返还一个
+
 		
 	}
 	| additive_expression '-' multiplicative_expression {
@@ -250,7 +250,7 @@ additive_expression
 		else
 			$$->code += generate_expr_code($1,$3,"-");
 		$$->it = temp_top;
-		// 规约了两个临时变量，需要返还一个
+
 		
 	}
 	;
@@ -273,7 +273,7 @@ shift_expression
 			$$->v_type = $1->v_type;
 		$$->code += generate_expr_code($1,$3,"<<");
 		$$->it = temp_top;
-		// 规约了两个临时变量，需要返还一个
+
 		
 
 	}
@@ -293,7 +293,7 @@ shift_expression
 			$$->v_type = $1->v_type;
 		$$->code += generate_expr_code($1,$3,">>");
 		$$->it = temp_top;
-		// 规约了两个临时变量，需要返还一个
+
 		
 	}
 	;
@@ -305,24 +305,39 @@ relational_expression
 		$$->children[0] = $1;
 		$$->children[1] = $3;
 		$1->sibing = $3;
+		$$->code += $1->code + $3->code;
+		$$->code += generate_bool_code($1, $3, "<");
+		$$->it = temp_top;
 	}
 	| relational_expression '>' shift_expression {
+		cout<<">"<<endl;
 		$$ = generate_expr_node();
 		$$->children[0] = $1;
 		$$->children[1] = $3;
 		$1->sibing = $3;
+		$$->code += $1->code + $3->code;
+		cout<<1<<endl;
+		$$->code += generate_bool_code($1, $3, ">");
+		cout<<2<<endl;
+		$$->it = temp_top;
 	}
 	| relational_expression LE_OP shift_expression {
 		$$ = generate_expr_node();
 		$$->children[0] = $1;
 		$$->children[1] = $3;
 		$1->sibing = $3;
+		$$->code += $1->code + $3->code;
+		$$->code += generate_bool_code($1, $3, "<=");
+		$$->it = temp_top;
 	}
 	| relational_expression GE_OP shift_expression {
 		$$ = generate_expr_node();
 		$$->children[0] = $1;
 		$$->children[1] = $3;
 		$1->sibing = $3;
+		$$->code += $1->code + $3->code;
+		$$->code += generate_bool_code($1, $3, ">=");
+		$$->it = temp_top;
 	}
 	;
 
@@ -333,12 +348,18 @@ equality_expression
 		$$->children[0] = $1;
 		$$->children[1] = $3;
 		$1->sibing = $3;
+		$$->code += $1->code + $3->code;
+		$$->code += generate_bool_code($1, $3, "==");
+		$$->it = temp_top;
 	}
 	| equality_expression NE_OP relational_expression {
 		$$ = generate_expr_node();
 		$$->children[0] = $1;
 		$$->children[1] = $3;
 		$1->sibing = $3;
+		$$->code += $1->code + $3->code;
+		$$->code += generate_bool_code($1, $3, "!=");
+		$$->it = temp_top;
 	}
 	;
 
@@ -360,7 +381,7 @@ and_expression
 			$$->v_type = $1->v_type;
 		$$->code += generate_expr_code($1,$3,"&");
 		$$->it = temp_top;
-		// 规约了两个临时变量，需要返还一个
+
 		
 	}
 	;
@@ -383,7 +404,7 @@ exclusive_or_expression
 			$$->v_type = $1->v_type;
 		$$->code += generate_expr_code($1,$3,"^");
 		$$->it = temp_top;
-		// 规约了两个临时变量，需要返还一个
+
 		
 	}
 	;
@@ -406,8 +427,6 @@ inclusive_or_expression
 			$$->v_type = $1->v_type;
 		$$->code += generate_expr_code($1,$3,"|");
 		$$->it = temp_top;
-		// 规约了两个临时变量，需要返还一个
-		
 	}
 	;
 
@@ -418,6 +437,9 @@ logical_and_expression
 		$$->children[0] = $1;
 		$$->children[1] = $3;
 		$1->sibing = $3;
+		$$->code += $1->code + $3->code;
+		$$->code += generate_bool_code($1, $3, "&&");
+		$$->it = temp_top;
 	}
 	;
 
@@ -428,6 +450,9 @@ logical_or_expression
 		$$->children[0] = $1;
 		$$->children[1] = $3;
 		$1->sibing = $3;
+		$$->code += $1->code + $3->code;
+		$$->code += generate_bool_code($1, $3, "||");
+		$$->it = temp_top;
 	}
 	;
 
@@ -463,7 +488,7 @@ assignment_expression
 		else
 			$$->code += generate_expr_code($1, $3, temp_operator);
 		$$->it = temp_top;
-		// 规约了两个临时变量，需要返还一个
+
 	}
 	;
 
@@ -762,7 +787,17 @@ expression_statement
 
 selection_statement
 	: IF '(' expression ')' statement {
-
+		$$ = generate_stmt_node();
+		$$->children[0] = $3;
+		$$->children[1] = $5;
+		label_number++;
+		$$->code += "\tjmp L"+ to_string(label_number)+"\n";
+		$$->code += "L"+ to_string(label_number-1)+":\n";
+		$$->code+= $5->code;
+		$$->code += "L"+ to_string(label_number)+":\n";
+		$$->code += $3->code;
+		$$->code += "\tcmp "+ temp_table[$3->it] + ", 0\n";
+		$$->code += "\tje L" + to_string(label_number-1) + "\n";
 	}
 	| IF '(' expression ')' statement ELSE statement {
 
@@ -770,12 +805,42 @@ selection_statement
 	;
 
 iteration_statement
-	: WHILE '(' expression ')' statement
-	| DO statement WHILE '(' expression ')' ';'
+	: WHILE '(' expression ')' statement {
+		cout<<"while statement\n";
+		$$ = generate_stmt_node();
+		$$->children[0] = $3;
+		$$->children[1] = $5;
+		label_number++;
+		$$->code += "\tjmp L"+to_string(label_number)+"\n";
+		$$->code += "L"+to_string(label_number-1)+":\n";
+		$$->code += $5->code;
+		$$->code += "\tjmp L"+to_string(label_number)+"\n";
+		$$->code += "L"+to_string(label_number)+":\n";
+		$$->code += $3->code;
+		$$->code += "cmp "+ temp_table[$3->it] + ", 0\n";
+		$$->code += "\tje L" + to_string(label_number-1) + "\n";
+		label_number++;
+	}
+	| DO statement WHILE '(' expression ')' ';' {
+		$$ = generate_stmt_node();
+		$$->children[0] = $2;
+		$$->children[1] = $5;
+		label_number++;
+		$$->code += "\tjmp L"+to_string(label_number-1)+"\n";
+		$$->code += "L"+to_string(label_number-1)+":\n";
+		$$->code += $2->code;
+		$$->code += "\tjmp L"+to_string(label_number)+"\n";
+		$$->code += "L"+to_string(label_number)+":\n";
+		$$->code += $5->code;
+		$$->code += "cmp "+ temp_table[$3->it] + ", 0\n";
+		$$->code += "\tje L" + to_string(label_number-1) + "\n";
+		label_number++;
+	}
 	| FOR '(' expression_statement expression_statement ')' statement {
 		$$ = generate_stmt_node();
 		$$->children[0] = $3;
 		$$->children[1] = $4;
+		$$->children[2] = $6;
 		// 循环一般需要两个标签
 		$$->code += $3->code;
 		$$->code += "\tjmp L" + to_string(label_number+1) + "\n";

@@ -68,7 +68,8 @@ Node *generate_stmt_node()
     Node *ret = NULL;
     ret = new Node();
     ret->nd_type = STMT_t;
-    if(label_need){
+    if (label_need)
+    {
         label_need = false;
         ret->label = next_label;
         ret->code = "L" + to_string(next_label) + ":\n";
@@ -112,7 +113,7 @@ string generate_expr_code(Node *node1, Node *node2, string op)
         if (node1->nd_type == ID_t)
             op1 = node1->name;
         else
-            op1 = to_string(node1->fvalue);
+            op1 = to_string(node1->ivalue);
     }
     else
     {
@@ -269,7 +270,8 @@ string generate_double_code(Node *node1, Node *node2, string op)
     {
         if (node1->nd_type == ID_t)
             op1 = node1->name;
-        else{
+        else
+        {
             cout << "不允许不是初始值的浮点数常量!" << endl;
         }
     }
@@ -438,16 +440,6 @@ string generate_post_code(Node *node, string op)
         temp_top--;
     }
     ret += "\tmov eax, " + op1 + "\n";
-
-    if (op == "++")
-    {
-        ret += "\tinc eax\n";
-    }
-    else if (op == "--")
-    {
-        ret += "\tdec eax]\n";
-    }
-    // 后缀表达式返回之前的值就行了
     temp_top++;
     if (temp_top > max_top)
     {
@@ -455,6 +447,108 @@ string generate_post_code(Node *node, string op)
         temp_table.push_back("temp_" + to_string(max_top));
     }
     ret += "\tmov " + temp_table[temp_top] + ", eax\n";
+
+    if (op == "++")
+    {
+        ret += "\tinc eax\n";
+        ret += "\tmov " + node->name + ", eax\n";
+    }
+    else if (op == "--")
+    {
+        ret += "\tdec eax\n";
+        ret += "\tmov " + node->name + ", eax\n";
+    }
+    // 后缀表达式返回之前的值就行了
+    return ret;
+}
+
+string generate_bool_code(Node *node1, Node *node2, string op)
+{
+    string ret;
+    // 判断左右操作数是id还是有临时变量
+    string op1; // op1 还可能是标识符和常量，没有临时变量
+    if (node1->it == -1)
+    {
+        if (node1->nd_type == ID_t)
+            op1 = node1->name;
+        else
+            op1 = to_string(node1->ivalue);
+    }
+    else
+    {
+        op1 = temp_table[node1->it];
+        temp_top--;
+    }
+    ret += "\tmov eax, " + op1 + "\n";
+    string op2;
+    if (node2->it == -1)
+    {
+        op2 = to_string(node2->ivalue);
+    }
+    else
+    {
+        op2 = temp_table[node2->it];
+        temp_top--;
+    }
+    // 根据运算符生成代码
+    if (op == "<=")
+    {
+        ret += "\tcmp eax, " + op2 + "\n";
+        ret += "\tjle L" + to_string(label_number++) + "\n";
+    }
+    else if (op == ">=")
+    {
+        ret += "\tcmp eax, " + op2 + "\n";
+        ret += "\tjge L" + to_string(label_number++) + "\n";
+    }
+    else if (op == "==")
+    {
+        ret += "\tcmp eax, " + op2 + "\n";
+        ret += "\tje L" + to_string(label_number++) + "\n";
+    }
+    else if (op == "!=")
+    {
+        ret += "\tcmp eax, " + op2 + "\n";
+        ret += "\tjne L" + to_string(label_number++) + "\n";
+    }
+    else if (op == "<")
+    {
+        ret += "\tcmp eax, " + op2 + "\n";
+        ret += "\tjl L" + to_string(label_number++) + "\n";
+    }
+    else if (op == ">")
+    {
+        ret += "\tcmp eax, " + op2 + "\n";
+        ret += "\tjg L" + to_string(label_number++) + "\n";
+    }
+    else if (op == "&&")
+    {
+        ret += "\tand eax," + op2 + "\n";
+        ret += "\tcmp eax, " + op2 + "\n";
+        ret += "\tjne L" + to_string(label_number++) + "\n";
+    }
+    else if (op == "||")
+    {
+        ret += "\tor eax," + op2 + "\n";
+        ret += "\tcmp eax, " + op2 + "\n";
+        ret += "\tjne L" + to_string(label_number++) + "\n";
+    }
+    // 这里结果不要用op1了，再加一个临时变量
+    ret += "\tmov eax, " + op1 + "\n";
+    temp_top++;
+    if (temp_top > max_top)
+    {
+        max_top++;
+        temp_table.push_back("temp_" + to_string(max_top));
+    }
+    ret += "\tjmp L" + to_string(label_number) + "\n";
+    ret += "L" + to_string(label_number - 1) + ":\n";
+
+    ret += "\tmov " + temp_table[temp_top] + ", 1\n";
+    ret += "L" + to_string(label_number) + ":\n";
+    ret += "\tmov " + temp_table[temp_top] + ", 0\n";
+    label_number++;
+
     return ret;
 }
 

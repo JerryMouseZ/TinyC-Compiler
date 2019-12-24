@@ -123,6 +123,7 @@ string generate_expr_code(Node *node1, Node *node2, string op);
 string generate_double_code(Node *node1, Node *node2, string op);
 string generate_pre_code(Node *node, string op);
 string generate_post_code(Node *node, string op);
+string generate_bool_code(Node *node1, Node*node2, string op);
 
 string generate_var_define();
 string generate_header();
