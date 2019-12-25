@@ -12,7 +12,7 @@ using namespace std;
 extern int line;
 extern int label_number;
 extern int next_label;
-extern bool label_need;
+extern int label_need;
 enum ID_TYPE
 {
     VAR_T,
@@ -102,7 +102,8 @@ public:
     double fvalue;
     string svalue;
     bool has_value; // 判断value的值是否有效
-    int label;
+    int begin_label;
+    int end_label;
     // int next_label;
 
 public:
@@ -130,3 +131,4 @@ string generate_header();
 void table_init();
 void printVarTable();
 void copyValue(Node *node1, Node *node2);
+string generate_and_or_code(Node *node1, Node *node2, string op);

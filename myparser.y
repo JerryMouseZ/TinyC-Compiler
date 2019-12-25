@@ -17,7 +17,7 @@ int temp_top = -1;
 int max_top = -1;
 int label_number=0;
 int next_label = 0;
-bool label_need = false;
+int label_need = 0;
 vector<string> temp_table; 
 %}
 
@@ -112,7 +112,7 @@ postfix_expression
 			// 数里面的百分号，以 %lf 作分隔符，调用多次 invoke __scanf
 			string format = $3->svalue;
 			Node * temp = $3->sibing;
-			int i=0;
+			int i = 0;
 			while(i != -1){
 				i = format.find("%", i);
 				if(i == -1)
@@ -337,9 +337,6 @@ shift_expression
 			$$->v_type = $1->v_type;
 		$$->code += generate_expr_code($1,$3,"<<");
 		$$->it = temp_top;
-
-		
-
 	}
 	| shift_expression RIGHT_OP additive_expression {
 		$$ = generate_expr_node();
@@ -357,8 +354,6 @@ shift_expression
 			$$->v_type = $1->v_type;
 		$$->code += generate_expr_code($1,$3,">>");
 		$$->it = temp_top;
-
-		
 	}
 	;
 
@@ -366,39 +361,47 @@ relational_expression
 	: shift_expression	{$$ = $1;}
 	| relational_expression '<' shift_expression {
 		$$ = generate_expr_node();
+		$$->v_type = Boolean;
 		$$->children[0] = $1;
 		$$->children[1] = $3;
 		$1->sibing = $3;
 		$$->code += $1->code + $3->code;
 		$$->code += generate_bool_code($1, $3, "<");
 		$$->it = temp_top;
+		$$->end_label = label_number;
 	}
 	| relational_expression '>' shift_expression {
 		$$ = generate_expr_node();
+		$$->v_type = Boolean;
 		$$->children[0] = $1;
 		$$->children[1] = $3;
 		$1->sibing = $3;
 		$$->code += $1->code + $3->code;
 		$$->code += generate_bool_code($1, $3, ">");
 		$$->it = temp_top;
+		$$->end_label = label_number;
 	}
 	| relational_expression LE_OP shift_expression {
 		$$ = generate_expr_node();
+		$$->v_type = Boolean;
 		$$->children[0] = $1;
 		$$->children[1] = $3;
 		$1->sibing = $3;
 		$$->code += $1->code + $3->code;
 		$$->code += generate_bool_code($1, $3, "<=");
 		$$->it = temp_top;
+		$$->end_label = label_number;
 	}
 	| relational_expression GE_OP shift_expression {
 		$$ = generate_expr_node();
+		$$->v_type = Boolean;
 		$$->children[0] = $1;
 		$$->children[1] = $3;
 		$1->sibing = $3;
 		$$->code += $1->code + $3->code;
 		$$->code += generate_bool_code($1, $3, ">=");
 		$$->it = temp_top;
+		$$->end_label = label_number;
 	}
 	;
 
@@ -406,21 +409,25 @@ equality_expression
 	: relational_expression {$$ = $1;}
 	| equality_expression EQ_OP relational_expression {
 		$$ = generate_expr_node();
+		$$->v_type = Boolean;
 		$$->children[0] = $1;
 		$$->children[1] = $3;
 		$1->sibing = $3;
 		$$->code += $1->code + $3->code;
 		$$->code += generate_bool_code($1, $3, "==");
 		$$->it = temp_top;
+		$$->end_label = label_number;
 	}
 	| equality_expression NE_OP relational_expression {
 		$$ = generate_expr_node();
+		$$->v_type = Boolean;
 		$$->children[0] = $1;
 		$$->children[1] = $3;
 		$1->sibing = $3;
 		$$->code += $1->code + $3->code;
 		$$->code += generate_bool_code($1, $3, "!=");
 		$$->it = temp_top;
+		$$->end_label = label_number;
 	}
 	;
 
@@ -495,11 +502,12 @@ logical_and_expression
 	: inclusive_or_expression {$$ = $1;}
 	| logical_and_expression AND_OP inclusive_or_expression {
 		$$ = generate_expr_node();
+		$$->v_type = Boolean;
 		$$->children[0] = $1;
 		$$->children[1] = $3;
 		$1->sibing = $3;
 		$$->code += $1->code + $3->code;
-		$$->code += generate_bool_code($1, $3, "&&");
+		$$->code += generate_and_or_code($1, $3, "&&");
 		$$->it = temp_top;
 	}
 	;
@@ -508,11 +516,12 @@ logical_or_expression
 	: logical_and_expression {$$ = $1;}
 	| logical_or_expression OR_OP logical_and_expression {
 		$$ = generate_expr_node();
+		$$->v_type = Boolean;
 		$$->children[0] = $1;
 		$$->children[1] = $3;
 		$1->sibing = $3;
 		$$->code += $1->code + $3->code;
-		$$->code += generate_bool_code($1, $3, "||");
+		$$->code += generate_and_or_code($1, $3, "||");
 		$$->it = temp_top;
 	}
 	;
@@ -543,7 +552,6 @@ assignment_expression
 		}
 		else
 			$$->v_type = $1->v_type;
-		$$->code += $1->code + $3->code; // 先把孩子的代码加上
 		if($3->v_type == Double)
 			$$->code += generate_double_code($1, $3, temp_operator);
 		else

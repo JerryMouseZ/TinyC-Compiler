@@ -40,7 +40,8 @@
         "xiosbase": "cpp",
         "iosfwd": "cpp",
         "hash_map": "cpp",
-        "unordered_map": "cpp"
+        "unordered_map": "cpp",
+        "system_error": "cpp"
     },
     // "files.exclude": {
     //     "**/.classpath": true,

@@ -13,7 +13,9 @@ Node::Node()
     it = -1;
     ivalue = 0;
     fvalue = 0;
-    label = -1;
+
+    begin_label = label_number;
+    end_label = label_number;
     // next_label = -1;
     // value只能赋值一次，就不做初始化了
 }
@@ -58,7 +60,8 @@ Node *check_type(char *id)
     }
     return ret;
 }
-void table_init(){
+void table_init()
+{
     ID_Table["printf"] = "FUNC";
     ID_Table["scanf"] = "FUNC";
     FuncEntry f1, f2;
@@ -74,6 +77,13 @@ Node *generate_expr_node()
     Node *ret = NULL;
     ret = new Node();
     ret->nd_type = EXPR_t;
+    if (label_need)
+    {
+        label_need--;
+        ret->end_label = ret->begin_label = next_label;
+        label_number++;
+        ret->code = "L" + to_string(next_label) + ":\n";
+    }
     return ret;
 }
 Node *generate_stmt_node()
@@ -83,10 +93,12 @@ Node *generate_stmt_node()
     ret->nd_type = STMT_t;
     if (label_need)
     {
-        label_need = false;
-        ret->label = next_label;
+        label_need--;
+        ret->end_label = ret->begin_label = next_label;
+        label_number++;
         ret->code = "L" + to_string(next_label) + ":\n";
     }
+
     return ret;
 }
 Node *generate_null_node()
@@ -137,7 +149,10 @@ string generate_expr_code(Node *node1, Node *node2, string op)
     string op2;
     if (node2->it == -1)
     {
-        op2 = to_string(node2->ivalue);
+        if (node2->nd_type == ID_t)
+            op2 = node2->name;
+        else
+            op2 = to_string(node2->ivalue);
     }
     else
     {
@@ -149,7 +164,6 @@ string generate_expr_code(Node *node1, Node *node2, string op)
     ret += "\t";
     if (op == "-")
     {
-        //??点数??另???一套寄存器, 但是??点数??需要支持加减乘???
         ret += "sub eax, " + op2 + "\n";
     }
     else if (op == "+")
@@ -191,7 +205,8 @@ string generate_expr_code(Node *node1, Node *node2, string op)
     else if (op == "=")
     {
         // 拿到node1的在符号表中存储的变量名
-        ret += "mov eax, " + op2 + "\n";
+        ret = "";
+        ret += "\tmov eax, " + op2 + "\n";
         ret += "\tmov " + op1 + ", eax\n";
     }
     else if (op == ">>=")
@@ -414,7 +429,8 @@ string generate_pre_code(Node *node, string op)
     else if (op == "!")
     {
         // 逻辑???
-        //先不实现
+        //和自己异或
+        ret += "\tnot eax\n";
     }
     else if (op == "++")
     {
@@ -498,7 +514,10 @@ string generate_bool_code(Node *node1, Node *node2, string op)
     string op2;
     if (node2->it == -1)
     {
-        op2 = to_string(node2->ivalue);
+        if (node2->nd_type == ID_t)
+            op2 = node2->name;
+        else
+            op2 = to_string(node2->ivalue);
     }
     else
     {
@@ -536,37 +555,74 @@ string generate_bool_code(Node *node1, Node *node2, string op)
         ret += "\tcmp eax, " + op2 + "\n";
         ret += "\tjg L" + to_string(label_number) + "\n";
     }
-    else if (op == "&&")
-    {
-        ret += "\tand eax," + op2 + "\n";
-        ret += "\tcmp eax, " + op2 + "\n";
-        ret += "\tjne L" + to_string(label_number) + "\n";
-    }
-    else if (op == "||")
-    {
-        ret += "\tor eax," + op2 + "\n";
-        ret += "\tcmp eax, " + op2 + "\n";
-        ret += "\tjne L" + to_string(label_number) + "\n";
-    }
     // 这里结果不要用op1了，再加一个临时变量
+    ret += "\tmov eax, 0\n";
+    ret += "\tjmp L" + to_string(label_number + 1) + "\n";
+    ret += "L" + to_string(label_number) + ":\n";
+    ret += "\tmov eax, 1\n";
+    label_number++;
+    ret += "L" + to_string(label_number) + ":\n";
+    label_number++;
     temp_top++;
     if (temp_top > max_top)
     {
         max_top++;
         temp_table.push_back("temp_" + to_string(max_top));
     }
-    // 这样就可以只用一个标签了
-    ret += "\tmov " + temp_table[temp_top] + ", 0\n";
-    // jmp next
-    ret += "\tjmp L" + to_string(label_number + 1) + "\n";
-    ret += "L" + to_string(label_number) + ":\n";
-    ret += "\tmov " + temp_table[temp_top] + ", 1\n";
-    label_number++;
-    next_label = label_number;
-    label_need = true;
+    ret += "\tmov " + temp_table[temp_top] + ", eax\n";
     return ret;
 }
 
+string generate_and_or_code(Node *node1, Node *node2, string op)
+{
+    string ret;
+    // 判断左右操作数是id还是有临时变量
+    string op1; // op1 还可能是标识符和常量，没有临时变量
+    if (node1->it == -1)
+    {
+        if (node1->nd_type == ID_t)
+            op1 = node1->name;
+        else
+            op1 = to_string(node1->ivalue);
+    }
+    else
+    {
+        op1 = temp_table[node1->it];
+        temp_top--;
+    }
+    ret += "\tmov eax, " + op1 + "\n";
+    string op2;
+    if (node2->it == -1)
+    {
+        if (node2->nd_type == ID_t)
+            op2 = node2->name;
+        else
+            op2 = to_string(node2->ivalue);
+    }
+    else
+    {
+        op2 = temp_table[node2->it];
+        temp_top--;
+    }
+    if (op == "&&")
+    {
+        // 但是按位与不一定能实现与的功能如 010 与 101
+        ret += "\tand eax, " + op2 + "\n";
+    }
+    else if (op == "||")
+    {
+        // 按位或可以实现或的功能
+        ret += "\tor eax, " + op2 + "\n";
+    }
+    temp_top++;
+    if (temp_top > max_top)
+    {
+        max_top++;
+        temp_table.push_back("temp_" + to_string(max_top));
+    }
+    ret += "\tmov " + temp_table[temp_top] + ", eax\n";
+    return ret;
+}
 // expr stmt else stmt
 string generate_if_code(Node *node1, Node *node2, Node *node3)
 {
@@ -602,7 +658,6 @@ string generate_if_code(Node *node1, Node *node2, Node *node3)
         ret += node3->code;
     }
     // 接下来是下一句语句了
-    next_label = label_number + 1;
     // next_label被占用了，不应给别人使用
     label_number++;
     label_need = true;
