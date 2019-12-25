@@ -41,6 +41,8 @@ Node *check_type(char *id)
         {
             auto search = Fuction_Table.find(name);
             auto result = search->second;
+            ret->name = result.name;
+            ret->v_type = result.type;
         }
         else if (type == "POINTER")
         {
@@ -55,6 +57,17 @@ Node *check_type(char *id)
         ret->state = Not_Def;
     }
     return ret;
+}
+void table_init(){
+    ID_Table["printf"] = "FUNC";
+    ID_Table["scanf"] = "FUNC";
+    FuncEntry f1, f2;
+    f1.name = "printf";
+    f1.type = None;
+    f2.name = "scanf";
+    f2.type = None;
+    Fuction_Table["printf"] = f1;
+    Fuction_Table["scanf"] = f2;
 }
 Node *generate_expr_node()
 {
@@ -380,10 +393,12 @@ string generate_pre_code(Node *node, string op)
     if (op == "&")
     {
         // 取地址
+        ret += "\tmov eax, offset " + op1 + "\n";
     }
     else if (op == "*")
     {
-        // 取??
+        // 取值
+        ret += "\tmov eax, [eax]\n";
     }
     else if (op == "-")
     {
@@ -494,61 +509,103 @@ string generate_bool_code(Node *node1, Node *node2, string op)
     if (op == "<=")
     {
         ret += "\tcmp eax, " + op2 + "\n";
-        ret += "\tjle L" + to_string(label_number++) + "\n";
+        ret += "\tjle L" + to_string(label_number) + "\n";
     }
     else if (op == ">=")
     {
         ret += "\tcmp eax, " + op2 + "\n";
-        ret += "\tjge L" + to_string(label_number++) + "\n";
+        ret += "\tjge L" + to_string(label_number) + "\n";
     }
     else if (op == "==")
     {
         ret += "\tcmp eax, " + op2 + "\n";
-        ret += "\tje L" + to_string(label_number++) + "\n";
+        ret += "\tje L" + to_string(label_number) + "\n";
     }
     else if (op == "!=")
     {
         ret += "\tcmp eax, " + op2 + "\n";
-        ret += "\tjne L" + to_string(label_number++) + "\n";
+        ret += "\tjne L" + to_string(label_number) + "\n";
     }
     else if (op == "<")
     {
         ret += "\tcmp eax, " + op2 + "\n";
-        ret += "\tjl L" + to_string(label_number++) + "\n";
+        ret += "\tjl L" + to_string(label_number) + "\n";
     }
     else if (op == ">")
     {
         ret += "\tcmp eax, " + op2 + "\n";
-        ret += "\tjg L" + to_string(label_number++) + "\n";
+        ret += "\tjg L" + to_string(label_number) + "\n";
     }
     else if (op == "&&")
     {
         ret += "\tand eax," + op2 + "\n";
         ret += "\tcmp eax, " + op2 + "\n";
-        ret += "\tjne L" + to_string(label_number++) + "\n";
+        ret += "\tjne L" + to_string(label_number) + "\n";
     }
     else if (op == "||")
     {
         ret += "\tor eax," + op2 + "\n";
         ret += "\tcmp eax, " + op2 + "\n";
-        ret += "\tjne L" + to_string(label_number++) + "\n";
+        ret += "\tjne L" + to_string(label_number) + "\n";
     }
     // 这里结果不要用op1了，再加一个临时变量
-    ret += "\tmov eax, " + op1 + "\n";
     temp_top++;
     if (temp_top > max_top)
     {
         max_top++;
         temp_table.push_back("temp_" + to_string(max_top));
     }
-    ret += "\tjmp L" + to_string(label_number) + "\n";
-    ret += "L" + to_string(label_number - 1) + ":\n";
-
-    ret += "\tmov " + temp_table[temp_top] + ", 1\n";
-    ret += "L" + to_string(label_number) + ":\n";
+    // 这样就可以只用一个标签了
     ret += "\tmov " + temp_table[temp_top] + ", 0\n";
+    // jmp next
+    ret += "\tjmp L" + to_string(label_number + 1) + "\n";
+    ret += "L" + to_string(label_number) + ":\n";
+    ret += "\tmov " + temp_table[temp_top] + ", 1\n";
     label_number++;
+    next_label = label_number;
+    label_need = true;
+    return ret;
+}
 
+// expr stmt else stmt
+string generate_if_code(Node *node1, Node *node2, Node *node3)
+{
+    string ret;
+    ret += node1->code;
+    string op1; // op1 还可能是标识符和常量，没有临时变量
+    if (node1->it == -1)
+    {
+        if (node1->nd_type == ID_t)
+            op1 = node1->name;
+        else
+        {
+            cout << "不可被赋值的左值: at line: " << line << endl;
+        }
+    }
+    else
+    {
+        op1 = temp_table[node1->it];
+        temp_top--;
+    }
+    // 比较
+    ret += "\tcmp " + op1 + ", 0\n";
+    // 如果为0jmp到 false label
+    ret += "\tje L" + to_string(label_number + 1) + "\n";
+    ret += node2->code;
+    // 如果是if else 语句，直接就有false label
+    if (node3 != NULL)
+    {
+        label_number++;
+        // 刚才的语句需要直接跳转到下面
+        ret += "\tjmp L" + to_string(label_number + 1) + "\n";
+        ret += "L" + to_string(label_number) + ":\n";
+        ret += node3->code;
+    }
+    // 接下来是下一句语句了
+    next_label = label_number + 1;
+    // next_label被占用了，不应给别人使用
+    label_number++;
+    label_need = true;
     return ret;
 }
 
@@ -588,6 +645,8 @@ string generate_var_define()
         // 打印临时变量表
         ret += "\t" + temp_table[i] + "\tdd\t\t?\n";
     }
+    // 打印输入缓冲
+    ret += "\tint_buffer\tdb \'%d\',0\n\tch_buffer\tdb \'%c\',0\n";
     ret += ".code\n";
     //    .code
     ret += "start:\n\tcall main\n";
@@ -605,10 +664,15 @@ string generate_header()
     ret += "\tinclude \\masm32\\include\\user32.inc\n";
     ret += "\tinclude \\masm32\\include\\kernel32.inc\n";
     ret += "\tinclude \\masm32\\include\\masm32.inc\n";
+    ret += "\tinclude \\masm32\\macros\\macros.asm\n";
+    ret += "\tinclude \\masm32\\include\\msvcrt.inc\n";
+    ret += "\tinclude \\masm32\\include\\gdi32.inc\n";
     ret += "\n";
     ret += "\tincludelib \\masm32\\lib\\user32.lib\n";
     ret += "\tincludelib \\masm32\\lib\\kernel32.lib\n";
     ret += "\tincludelib \\masm32\\lib\\masm32.lib\n";
+    ret += "\tincludelib \\masm32\\lib\\msvcrt.lib\n";
+    ret += "\tincludelib \\masm32\\lib\\gdi32.lib\n";
     return ret;
 }
 

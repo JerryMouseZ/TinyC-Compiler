@@ -63,7 +63,7 @@ vector<string> temp_table;
 
 %token IF ELSE WHILE DO FOR CONTINUE BREAK RETURN
 
-%start translation_unit
+%start program
 
 %%
 primary_expression
@@ -82,8 +82,65 @@ primary_expression
 postfix_expression
 	: primary_expression	{$$ = $1;}
 	| postfix_expression '[' expression ']'	{cout<<"[]";}
-	| postfix_expression '(' ')'	{cout<<"()";}
-	| postfix_expression '(' argument_expression_list ')'	{cout<<"arguement list"<<endl;}
+	| postfix_expression '(' ')'	{
+		// 无参函数调用
+	}
+	| postfix_expression '(' argument_expression_list ')'	{
+		$$ = generate_expr_node();
+		// 返回值在函数标识符里就应该拿到了
+		$$->code += $3->code;
+		$$->children[0] = $1;
+		$$->children[1] = $3;
+		$$->v_type = $1->v_type;
+		if($1->name == "printf"){
+			// 第一个参数是一个字符串常量, 后面一堆参数是要输出的东西，拿到每一个的op 
+			// 用一个全局变量来传递那个字符串好像就没什么问题了
+			$$->code += "\tprintf(\"";
+			// 参数列表
+			$$->code += $3->svalue;
+			$$->code += "\"";
+			Node * temp = $3->sibing;
+			while(temp != NULL){
+				if(temp->it == -1)
+					$$->code += ", " + temp->name;
+				temp = temp->sibing;
+			}
+			$$->code += ")\n";
+		}
+		else if($1->name == "scanf"){
+			// 而且有%lf的话还要使用 call ReadFloat
+			// 数里面的百分号，以 %lf 作分隔符，调用多次 invoke __scanf
+			string format = $3->svalue;
+			Node * temp = $3->sibing;
+			int i=0;
+			while(i != -1){
+				i = format.find("%", i);
+				if(i == -1)
+					break;
+				// lf
+				if(format[i+1]=='l'){
+					$$->code += "\tcall ReadFloat\n";
+					// 存储到相应的位置
+					$$->code += "\tmov eax, " +  temp_table[temp->it] +"\n";
+					$$->code += "\tfstp dword ptr ss:[eax]\n";
+				}
+				//d
+				else if(format[i+1]=='d'){
+					$$->code += "\tinvoke crt_scanf, addr int_buffer, ";
+					$$->code += temp_table[temp->it] + "\n";
+				}
+				else if(format[i+1] == 'c'){
+					$$->code += "\tinvoke crt_scanf, addr ch_buffer, ";
+					$$->code += temp_table[temp->it] + "\n";
+				}
+				temp = temp->sibing;
+				i++;
+			}
+		}
+		else{
+			;
+		}
+	}
 	| postfix_expression '.' IDENTIFIER	{
 		// 结构操作，取出该结构的成员
 		cout<<"."<<endl;
@@ -104,12 +161,19 @@ postfix_expression
 	}
 	;
 
+
 argument_expression_list
 	: assignment_expression {
-
+		$$ = $1;
 	}
 	| argument_expression_list ',' assignment_expression {
-
+		$$ = $1;
+		Node*temp = $1;
+		while(temp->sibing != NULL){
+			temp = temp->sibing;
+		}
+		temp->sibing = $3;
+		$$->code += $3->code;
 	}
 	;
 
@@ -310,15 +374,12 @@ relational_expression
 		$$->it = temp_top;
 	}
 	| relational_expression '>' shift_expression {
-		cout<<">"<<endl;
 		$$ = generate_expr_node();
 		$$->children[0] = $1;
 		$$->children[1] = $3;
 		$1->sibing = $3;
 		$$->code += $1->code + $3->code;
-		cout<<1<<endl;
 		$$->code += generate_bool_code($1, $3, ">");
-		cout<<2<<endl;
 		$$->it = temp_top;
 	}
 	| relational_expression LE_OP shift_expression {
@@ -735,14 +796,14 @@ designator_list
 	;
 
 designator
-	: '[' constant_expression ']'	{printf("designator");}
+	: '[' constant_expression ']'	{}
 	| '.' IDENTIFIER
 	;
 
 statement
 	: compound_statement { $$ = $1;}
 	| expression_statement {$$ = $1;}
-	| selection_statement
+	| selection_statement {$$ = $1;}
 	| iteration_statement {$$ = $1;}
 	| jump_statement
 	;
@@ -779,7 +840,7 @@ block_item
 	;
 
 expression_statement
-	: ';'
+	: ';' {$$ = generate_stmt_node();}
 	| expression ';' {
 		$$ = $1;
 	}
@@ -790,23 +851,19 @@ selection_statement
 		$$ = generate_stmt_node();
 		$$->children[0] = $3;
 		$$->children[1] = $5;
-		label_number++;
-		$$->code += "\tjmp L"+ to_string(label_number)+"\n";
-		$$->code += "L"+ to_string(label_number-1)+":\n";
-		$$->code+= $5->code;
-		$$->code += "L"+ to_string(label_number)+":\n";
-		$$->code += $3->code;
-		$$->code += "\tcmp "+ temp_table[$3->it] + ", 0\n";
-		$$->code += "\tje L" + to_string(label_number-1) + "\n";
+		$$->code += generate_if_code($3,$5,NULL);
 	}
 	| IF '(' expression ')' statement ELSE statement {
-
+		$$ = generate_stmt_node();
+		$$->children[0] = $3;
+		$$->children[1] = $5;
+		$$->children[2] = $7;
+		$$->code += generate_if_code($3,$5,$7);
 	}
 	;
 
 iteration_statement
 	: WHILE '(' expression ')' statement {
-		cout<<"while statement\n";
 		$$ = generate_stmt_node();
 		$$->children[0] = $3;
 		$$->children[1] = $5;
@@ -817,8 +874,8 @@ iteration_statement
 		$$->code += "\tjmp L"+to_string(label_number)+"\n";
 		$$->code += "L"+to_string(label_number)+":\n";
 		$$->code += $3->code;
-		$$->code += "cmp "+ temp_table[$3->it] + ", 0\n";
-		$$->code += "\tje L" + to_string(label_number-1) + "\n";
+		$$->code += "\tcmp "+ temp_table[$3->it] + ", 0\n";
+		$$->code += "\tjne L" + to_string(label_number-1) + "\n";
 		label_number++;
 	}
 	| DO statement WHILE '(' expression ')' ';' {
@@ -832,8 +889,8 @@ iteration_statement
 		$$->code += "\tjmp L"+to_string(label_number)+"\n";
 		$$->code += "L"+to_string(label_number)+":\n";
 		$$->code += $5->code;
-		$$->code += "cmp "+ temp_table[$3->it] + ", 0\n";
-		$$->code += "\tje L" + to_string(label_number-1) + "\n";
+		$$->code += "\tcmp "+ temp_table[$3->it] + ", 0\n";
+		$$->code += "\tjne L" + to_string(label_number-1) + "\n";
 		label_number++;
 	}
 	| FOR '(' expression_statement expression_statement ')' statement {
@@ -852,7 +909,7 @@ iteration_statement
 		$$->code += "L" + to_string(label_number) + ":\n";
 		$$->code += $4->code;
 		$$->code += "\tcmp "+ temp_table[$4->it] +", 0\n";
-		$$->code += "\tje L" + to_string(label_number-1) + "\n";
+		$$->code += "\tjne L" + to_string(label_number-1) + "\n";
 		label_number++;
 	}
 	| FOR '(' expression_statement expression_statement expression ')' statement {
@@ -872,7 +929,7 @@ iteration_statement
 		$$->code += "L" + to_string(label_number) + ":\n";
 		$$->code += $4->code;
 		$$->code += "\tcmp "+ temp_table[$4->it] +", 0\n";
-		$$->code += "\tje L" + to_string(label_number-1) + "\n";
+		$$->code += "\tjne L" + to_string(label_number-1) + "\n";
 		label_number++;
 	}
 	| FOR '(' declaration expression_statement ')' statement {
@@ -890,7 +947,7 @@ iteration_statement
 		$$->code += "L" + to_string(label_number) + ":\n";
 		$$->code += $4->code;
 		$$->code += "\tcmp "+ temp_table[$4->it] +", 0\n";
-		$$->code += "\tje L" + to_string(label_number-1) + "\n";
+		$$->code += "\tjne L" + to_string(label_number-1) + "\n";
 		label_number++;
 	}
 	| FOR '(' declaration expression_statement expression ')' statement {
@@ -910,7 +967,7 @@ iteration_statement
 		$$->code += "L" + to_string(label_number) + ":\n";
 		$$->code += $4->code;
 		$$->code += "\tcmp "+ temp_table[$4->it] +", 0\n";
-		$$->code += "\tje L" + to_string(label_number-1) + "\n";
+		$$->code += "\tjne L" + to_string(label_number-1) + "\n";
 		label_number++;
 	}
 	;
@@ -922,18 +979,33 @@ jump_statement
 	| RETURN expression ';'
 	;
 
-translation_unit
-	: external_declaration {
+program
+	: translation_unit {
 		cout<<generate_header();
 		cout<<generate_var_define();
-		cout<<$1->code;
+		Node * temp = $1;
+		while(temp != NULL){
+			cout<<temp->code;
+			temp = temp->sibing;
+		}
 		cout<<"end start"<<endl;
 	}
-	| translation_unit external_declaration 
+	;
+
+translation_unit
+	: external_declaration {$$ = $1; }
+	| translation_unit external_declaration {
+		$$ = $1;
+		Node * temp = $$;
+		while(temp->sibing != NULL){
+			temp = temp->sibing;
+		}
+		temp->sibing = $2;
+	}
 	;
 
 external_declaration
-	: function_definition {}
+	: function_definition { $$ = $1;}
 	| declaration
 	;
 
@@ -991,7 +1063,9 @@ int main(int argc, char*argv[])
 			// 最后测试成功了以后再改文件
 			// lexer.yyin = new ifstream(argv[1]);
 			// lexer.yyout = new ofstream(argv[2]);
-			ofstream outf("out.txt");
+			table_init();
+			lexer.yyin = new ifstream("input.c");
+			ofstream outf("out.asm");
 			cout.rdbuf(outf.rdbuf());
 			n = parser.yyparse();
 			// parse_tree.get_label();

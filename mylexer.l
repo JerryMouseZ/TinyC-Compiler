@@ -161,6 +161,7 @@ L?\"(\\.|[^\\"\n])*\"	{
 							ss<<yytext;
 							string temp;
 							ss>>temp;
+							temp = temp.substr(1, temp.size()-2);
 							yylval = generate_const_node();
 							yylval->svalue = temp;
 							yylval->v_type = String;
