@@ -103,6 +103,8 @@ postfix_expression
 			while(temp != NULL){
 				if(temp->it == -1)
 					$$->code += ", " + temp->name;
+				else
+					$$->code += ", " + temp_table[temp->it];
 				temp = temp->sibing;
 			}
 			$$->code += ")\n";
@@ -126,11 +128,11 @@ postfix_expression
 				}
 				//d
 				else if(format[i+1]=='d'){
-					$$->code += "\tinvoke crt_scanf, addr int_buffer, ";
+					$$->code += "\tinvoke crt_scanf, SADD('%d',13,10), ";
 					$$->code += temp_table[temp->it] + "\n";
 				}
 				else if(format[i+1] == 'c'){
-					$$->code += "\tinvoke crt_scanf, addr ch_buffer, ";
+					$$->code += "\tinvoke crt_scanf, SADD('%c',13,10), ";
 					$$->code += temp_table[temp->it] + "\n";
 				}
 				temp = temp->sibing;

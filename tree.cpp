@@ -77,13 +77,13 @@ Node *generate_expr_node()
     Node *ret = NULL;
     ret = new Node();
     ret->nd_type = EXPR_t;
-    if (label_need)
-    {
-        label_need--;
-        ret->end_label = ret->begin_label = next_label;
-        label_number++;
-        ret->code = "L" + to_string(next_label) + ":\n";
-    }
+    // if (label_need)
+    // {
+    //     label_need--;
+    //     ret->end_label = ret->begin_label = next_label;
+    //     label_number++;
+    //     ret->code = "L" + to_string(next_label) + ":\n";
+    // }
     return ret;
 }
 Node *generate_stmt_node()
@@ -91,13 +91,13 @@ Node *generate_stmt_node()
     Node *ret = NULL;
     ret = new Node();
     ret->nd_type = STMT_t;
-    if (label_need)
-    {
-        label_need--;
-        ret->end_label = ret->begin_label = next_label;
-        label_number++;
-        ret->code = "L" + to_string(next_label) + ":\n";
-    }
+    // if (label_need)
+    // {
+    //     label_need--;
+    //     ret->end_label = ret->begin_label = next_label;
+    //     label_number++;
+    //     ret->code = "L" + to_string(next_label) + ":\n";
+    // }
 
     return ret;
 }
@@ -408,11 +408,13 @@ string generate_pre_code(Node *node, string op)
     if (op == "&")
     {
         // 取地址
+        ret = "";
         ret += "\tmov eax, offset " + op1 + "\n";
     }
     else if (op == "*")
     {
         // 取值
+        ret = "";
         ret += "\tmov eax, [eax]\n";
     }
     else if (op == "-")
@@ -660,13 +662,14 @@ string generate_if_code(Node *node1, Node *node2, Node *node3)
     // 接下来是下一句语句了
     // next_label被占用了，不应给别人使用
     label_number++;
-    label_need = true;
+    ret += "L" + to_string(label_number) + ":\n";
+    label_number++;
     return ret;
 }
 
 string generate_var_define()
 {
-    string ret = ".DATA\n";
+    string ret = ".data\n";
     auto i = Var_Table.begin();
     for (; i != Var_Table.end(); i++)
     {
@@ -700,11 +703,11 @@ string generate_var_define()
         // 打印临时变量表
         ret += "\t" + temp_table[i] + "\tdd\t\t?\n";
     }
+    ret += "\n";
     // 打印输入缓冲
-    ret += "\tint_buffer\tdb \'%d\',0\n\tch_buffer\tdb \'%c\',0\n";
     ret += ".code\n";
     //    .code
-    ret += "start:\n\tcall main\n";
+    ret += "start:\n\tcall main\n\tinkey\n\tret\n\n";
     return ret;
 }
 
@@ -727,7 +730,7 @@ string generate_header()
     ret += "\tincludelib \\masm32\\lib\\kernel32.lib\n";
     ret += "\tincludelib \\masm32\\lib\\masm32.lib\n";
     ret += "\tincludelib \\masm32\\lib\\msvcrt.lib\n";
-    ret += "\tincludelib \\masm32\\lib\\gdi32.lib\n";
+    ret += "\tincludelib \\masm32\\lib\\gdi32.lib\n\n";
     return ret;
 }
 
