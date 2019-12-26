@@ -18,6 +18,7 @@ Node::Node()
     begin_label = label_number;
     end_label = label_number;
     p_depth = 0;
+
     // next_label = -1;
     // value只能赋值一次，就不做初始化了
 }
@@ -61,6 +62,8 @@ Node *check_type(char *id)
         {
             auto search = Pointer_Table.find(name);
             auto result = search->second;
+            ret->name = name;
+            ret->v_type = result.type;
         }
     }
     else
@@ -208,9 +211,17 @@ string generate_expr_code(Node *node1, Node *node2, string op)
     else if (op == "=")
     {
         // 拿到node1的在符号表中存储的变量名
-        ret = "";
-        ret += "\tmov eax, " + op2 + "\n";
-        ret += "\tmov " + op1 + ", eax\n";
+        if (node1->p_value)
+        {
+            ret = "";
+            ret += "\tmov dword ptr [edx], " + op2 + "\n";
+            ret += "\tmov eax, " + op2 + "\n";
+        }
+        else{
+            ret = "";
+            ret += "\tmov eax, " + op2 + "\n";
+            ret += "\tmov " + op1 + ", eax\n";
+        }
     }
     else if (op == ">>=")
     {
@@ -417,7 +428,7 @@ string generate_pre_code(Node *node, string op)
     else if (op == "*")
     {
         // 取值
-        ret = "";
+        ret += "\tmov edx, eax\n";
         ret += "\tmov eax, [eax]\n";
     }
     else if (op == "-")

@@ -107,6 +107,7 @@ public:
     int begin_label;
     int end_label;
     int p_depth;
+    bool p_value = false;
     // int next_label;
 
 public:

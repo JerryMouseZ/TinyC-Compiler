@@ -81,9 +81,32 @@ primary_expression
 
 postfix_expression
 	: primary_expression	{$$ = $1;}
-	| postfix_expression '[' expression ']'	{cout<<"[]";}
+	| postfix_expression '[' expression ']'	{
+		// 数组
+
+	}
 	| postfix_expression '(' ')'	{
 		// 无参函数调用
+		$$ = generate_expr_node();
+		$$->v_type = $1->v_type;
+		$$->code += "\tinvoke "+$1->name;
+		Node * temp = $3;
+		while(temp != NULL){
+			if(temp->it == -1)
+				$$->code += ", " + temp->name;
+			else
+				$$->code += ", " + temp_table[temp->it];
+			temp = temp->sibing;
+		}
+		$$->code += "\n";
+		temp_top++;
+		if (temp_top > max_top)
+		{
+			max_top++;
+			temp_table.push_back("temp_" + to_string(max_top));
+		}
+		$$->code += "\tmov "+temp_table[temp_top] + ", eax\n";
+		$$->it = temp_top;
 	}
 	| postfix_expression '(' argument_expression_list ')'	{
 		$$ = generate_expr_node();
@@ -219,6 +242,8 @@ unary_expression
 		$$->code += $2->code + generate_pre_code($2, temp_operator);
 		$$->it = temp_top;
 		$$->v_type = $2->v_type;
+		if(temp_operator == "*")
+			$$->p_value = true;
 	}
 	;
 

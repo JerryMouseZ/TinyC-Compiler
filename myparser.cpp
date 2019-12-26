@@ -19,7 +19,7 @@
 * C++ source file generated from myparser.y.
 * 
 * Date: 12/26/19
-* Time: 13:57:23
+* Time: 15:17:40
 * 
 * AYACC Version: 2.07
 ****************************************************************************/
@@ -275,8 +275,11 @@ void YYPARSERNAME::yyaction(int action)
 #endif
 			{
 #line 84 ".\\myparser.y"
-cout<<"[]";
-#line 280 "myparser.cpp"
+
+		// 数组
+
+	
+#line 283 "myparser.cpp"
 			}
 		}
 		break;
@@ -287,11 +290,31 @@ cout<<"[]";
 			yyinitdebug((void YYFAR**)yya, 4);
 #endif
 			{
-#line 85 ".\\myparser.y"
+#line 88 ".\\myparser.y"
 
 		// 无参函数调用
+		(*(YYSTYPE YYFAR*)yyvalptr) = generate_expr_node();
+		(*(YYSTYPE YYFAR*)yyvalptr)->v_type = yyattribute(1 - 3)->v_type;
+		(*(YYSTYPE YYFAR*)yyvalptr)->code += "\tinvoke "+yyattribute(1 - 3)->name;
+		Node * temp = yyattribute(3 - 3);
+		while(temp != NULL){
+			if(temp->it == -1)
+				(*(YYSTYPE YYFAR*)yyvalptr)->code += ", " + temp->name;
+			else
+				(*(YYSTYPE YYFAR*)yyvalptr)->code += ", " + temp_table[temp->it];
+			temp = temp->sibing;
+		}
+		(*(YYSTYPE YYFAR*)yyvalptr)->code += "\n";
+		temp_top++;
+		if (temp_top > max_top)
+		{
+			max_top++;
+			temp_table.push_back("temp_" + to_string(max_top));
+		}
+		(*(YYSTYPE YYFAR*)yyvalptr)->code += "\tmov "+temp_table[temp_top] + ", eax\n";
+		(*(YYSTYPE YYFAR*)yyvalptr)->it = temp_top;
 	
-#line 295 "myparser.cpp"
+#line 318 "myparser.cpp"
 			}
 		}
 		break;
@@ -302,7 +325,7 @@ cout<<"[]";
 			yyinitdebug((void YYFAR**)yya, 5);
 #endif
 			{
-#line 88 ".\\myparser.y"
+#line 111 ".\\myparser.y"
 
 		(*(YYSTYPE YYFAR*)yyvalptr) = generate_expr_node();
 		// 返回值在函数标识符里就应该拿到了
@@ -379,7 +402,7 @@ cout<<"[]";
 			(*(YYSTYPE YYFAR*)yyvalptr)->it = temp_top;
 		}
 	
-#line 383 "myparser.cpp"
+#line 406 "myparser.cpp"
 			}
 		}
 		break;
@@ -390,12 +413,12 @@ cout<<"[]";
 			yyinitdebug((void YYFAR**)yya, 4);
 #endif
 			{
-#line 164 ".\\myparser.y"
+#line 187 ".\\myparser.y"
 
 		// 结构操作，取出该结构的成员
 		cout<<"."<<endl;
 	
-#line 399 "myparser.cpp"
+#line 422 "myparser.cpp"
 			}
 		}
 		break;
@@ -406,7 +429,7 @@ cout<<"[]";
 			yyinitdebug((void YYFAR**)yya, 3);
 #endif
 			{
-#line 168 ".\\myparser.y"
+#line 191 ".\\myparser.y"
 
 		(*(YYSTYPE YYFAR*)yyvalptr) = generate_expr_node();
 		(*(YYSTYPE YYFAR*)yyvalptr)->children[0] = yyattribute(1 - 2);
@@ -414,7 +437,7 @@ cout<<"[]";
 		(*(YYSTYPE YYFAR*)yyvalptr)->it = temp_top;
 		(*(YYSTYPE YYFAR*)yyvalptr)->v_type = yyattribute(1 - 2)->v_type;
 	
-#line 418 "myparser.cpp"
+#line 441 "myparser.cpp"
 			}
 		}
 		break;
@@ -425,7 +448,7 @@ cout<<"[]";
 			yyinitdebug((void YYFAR**)yya, 3);
 #endif
 			{
-#line 175 ".\\myparser.y"
+#line 198 ".\\myparser.y"
 
 		(*(YYSTYPE YYFAR*)yyvalptr) = generate_expr_node();
 		(*(YYSTYPE YYFAR*)yyvalptr)->children[0] = yyattribute(1 - 2);
@@ -433,7 +456,7 @@ cout<<"[]";
 		(*(YYSTYPE YYFAR*)yyvalptr)->it = temp_top;
 		(*(YYSTYPE YYFAR*)yyvalptr)->v_type = yyattribute(1 - 2)->v_type;
 	
-#line 437 "myparser.cpp"
+#line 460 "myparser.cpp"
 			}
 		}
 		break;
@@ -444,11 +467,11 @@ cout<<"[]";
 			yyinitdebug((void YYFAR**)yya, 2);
 #endif
 			{
-#line 186 ".\\myparser.y"
+#line 209 ".\\myparser.y"
 
 		(*(YYSTYPE YYFAR*)yyvalptr) = yyattribute(1 - 1);
 	
-#line 452 "myparser.cpp"
+#line 475 "myparser.cpp"
 			}
 		}
 		break;
@@ -459,7 +482,7 @@ cout<<"[]";
 			yyinitdebug((void YYFAR**)yya, 4);
 #endif
 			{
-#line 189 ".\\myparser.y"
+#line 212 ".\\myparser.y"
 
 		(*(YYSTYPE YYFAR*)yyvalptr) = yyattribute(1 - 3);
 		Node*temp = yyattribute(1 - 3);
@@ -469,7 +492,7 @@ cout<<"[]";
 		temp->sibing = yyattribute(3 - 3);
 		(*(YYSTYPE YYFAR*)yyvalptr)->code += yyattribute(3 - 3)->code;
 	
-#line 473 "myparser.cpp"
+#line 496 "myparser.cpp"
 			}
 		}
 		break;
@@ -480,9 +503,9 @@ cout<<"[]";
 			yyinitdebug((void YYFAR**)yya, 2);
 #endif
 			{
-#line 201 ".\\myparser.y"
+#line 224 ".\\myparser.y"
 (*(YYSTYPE YYFAR*)yyvalptr) = yyattribute(1 - 1);
-#line 486 "myparser.cpp"
+#line 509 "myparser.cpp"
 			}
 		}
 		break;
@@ -493,7 +516,7 @@ cout<<"[]";
 			yyinitdebug((void YYFAR**)yya, 3);
 #endif
 			{
-#line 202 ".\\myparser.y"
+#line 225 ".\\myparser.y"
 
 		(*(YYSTYPE YYFAR*)yyvalptr) = generate_expr_node();
 		(*(YYSTYPE YYFAR*)yyvalptr)->children[0] = yyattribute(2 - 2);
@@ -501,7 +524,7 @@ cout<<"[]";
 		(*(YYSTYPE YYFAR*)yyvalptr)->it = temp_top;
 		(*(YYSTYPE YYFAR*)yyvalptr)->v_type = yyattribute(2 - 2)->v_type;
 	
-#line 505 "myparser.cpp"
+#line 528 "myparser.cpp"
 			}
 		}
 		break;
@@ -512,7 +535,7 @@ cout<<"[]";
 			yyinitdebug((void YYFAR**)yya, 3);
 #endif
 			{
-#line 209 ".\\myparser.y"
+#line 232 ".\\myparser.y"
 
 		(*(YYSTYPE YYFAR*)yyvalptr) = generate_expr_node();
 		(*(YYSTYPE YYFAR*)yyvalptr)->children[0] = yyattribute(2 - 2);
@@ -520,7 +543,7 @@ cout<<"[]";
 		(*(YYSTYPE YYFAR*)yyvalptr)->it = temp_top;
 		(*(YYSTYPE YYFAR*)yyvalptr)->v_type = yyattribute(2 - 2)->v_type;
 	
-#line 524 "myparser.cpp"
+#line 547 "myparser.cpp"
 			}
 		}
 		break;
@@ -531,15 +554,17 @@ cout<<"[]";
 			yyinitdebug((void YYFAR**)yya, 3);
 #endif
 			{
-#line 216 ".\\myparser.y"
+#line 239 ".\\myparser.y"
 
 		(*(YYSTYPE YYFAR*)yyvalptr) = generate_expr_node();
 		(*(YYSTYPE YYFAR*)yyvalptr)->children[0] = yyattribute(2 - 2);
 		(*(YYSTYPE YYFAR*)yyvalptr)->code += yyattribute(2 - 2)->code + generate_pre_code(yyattribute(2 - 2), temp_operator);
 		(*(YYSTYPE YYFAR*)yyvalptr)->it = temp_top;
 		(*(YYSTYPE YYFAR*)yyvalptr)->v_type = yyattribute(2 - 2)->v_type;
+		if(temp_operator == "*")
+			(*(YYSTYPE YYFAR*)yyvalptr)->p_value = true;
 	
-#line 543 "myparser.cpp"
+#line 568 "myparser.cpp"
 			}
 		}
 		break;
@@ -550,9 +575,9 @@ cout<<"[]";
 			yyinitdebug((void YYFAR**)yya, 2);
 #endif
 			{
-#line 226 ".\\myparser.y"
+#line 251 ".\\myparser.y"
 temp_operator = "&";
-#line 556 "myparser.cpp"
+#line 581 "myparser.cpp"
 			}
 		}
 		break;
@@ -563,9 +588,9 @@ temp_operator = "&";
 			yyinitdebug((void YYFAR**)yya, 2);
 #endif
 			{
-#line 227 ".\\myparser.y"
+#line 252 ".\\myparser.y"
 temp_operator = "*";
-#line 569 "myparser.cpp"
+#line 594 "myparser.cpp"
 			}
 		}
 		break;
@@ -576,9 +601,9 @@ temp_operator = "*";
 			yyinitdebug((void YYFAR**)yya, 2);
 #endif
 			{
-#line 228 ".\\myparser.y"
+#line 253 ".\\myparser.y"
 temp_operator = "-";
-#line 582 "myparser.cpp"
+#line 607 "myparser.cpp"
 			}
 		}
 		break;
@@ -589,9 +614,9 @@ temp_operator = "-";
 			yyinitdebug((void YYFAR**)yya, 2);
 #endif
 			{
-#line 229 ".\\myparser.y"
+#line 254 ".\\myparser.y"
 temp_operator = "~";
-#line 595 "myparser.cpp"
+#line 620 "myparser.cpp"
 			}
 		}
 		break;
@@ -602,9 +627,9 @@ temp_operator = "~";
 			yyinitdebug((void YYFAR**)yya, 2);
 #endif
 			{
-#line 230 ".\\myparser.y"
+#line 255 ".\\myparser.y"
 temp_operator = "!";
-#line 608 "myparser.cpp"
+#line 633 "myparser.cpp"
 			}
 		}
 		break;
@@ -615,9 +640,9 @@ temp_operator = "!";
 			yyinitdebug((void YYFAR**)yya, 2);
 #endif
 			{
-#line 234 ".\\myparser.y"
+#line 259 ".\\myparser.y"
 (*(YYSTYPE YYFAR*)yyvalptr) = yyattribute(1 - 1);
-#line 621 "myparser.cpp"
+#line 646 "myparser.cpp"
 			}
 		}
 		break;
@@ -628,7 +653,7 @@ temp_operator = "!";
 			yyinitdebug((void YYFAR**)yya, 4);
 #endif
 			{
-#line 235 ".\\myparser.y"
+#line 260 ".\\myparser.y"
 
 		(*(YYSTYPE YYFAR*)yyvalptr) = generate_expr_node();
 		(*(YYSTYPE YYFAR*)yyvalptr)->children[0] = yyattribute(1 - 3);
@@ -649,7 +674,7 @@ temp_operator = "!";
 		(*(YYSTYPE YYFAR*)yyvalptr)->it = temp_top;
 
 	
-#line 653 "myparser.cpp"
+#line 678 "myparser.cpp"
 			}
 		}
 		break;
@@ -660,7 +685,7 @@ temp_operator = "!";
 			yyinitdebug((void YYFAR**)yya, 4);
 #endif
 			{
-#line 255 ".\\myparser.y"
+#line 280 ".\\myparser.y"
 
 		(*(YYSTYPE YYFAR*)yyvalptr) = generate_expr_node();
 		(*(YYSTYPE YYFAR*)yyvalptr)->children[0] = yyattribute(1 - 3);
@@ -683,7 +708,7 @@ temp_operator = "!";
 
 		
 	
-#line 687 "myparser.cpp"
+#line 712 "myparser.cpp"
 			}
 		}
 		break;
@@ -694,7 +719,7 @@ temp_operator = "!";
 			yyinitdebug((void YYFAR**)yya, 4);
 #endif
 			{
-#line 277 ".\\myparser.y"
+#line 302 ".\\myparser.y"
 
 		(*(YYSTYPE YYFAR*)yyvalptr) = generate_expr_node();
 		(*(YYSTYPE YYFAR*)yyvalptr)->children[0] = yyattribute(1 - 3);
@@ -715,7 +740,7 @@ temp_operator = "!";
 
 		
 	
-#line 719 "myparser.cpp"
+#line 744 "myparser.cpp"
 			}
 		}
 		break;
@@ -726,9 +751,9 @@ temp_operator = "!";
 			yyinitdebug((void YYFAR**)yya, 2);
 #endif
 			{
-#line 300 ".\\myparser.y"
+#line 325 ".\\myparser.y"
 (*(YYSTYPE YYFAR*)yyvalptr) = yyattribute(1 - 1);
-#line 732 "myparser.cpp"
+#line 757 "myparser.cpp"
 			}
 		}
 		break;
@@ -739,7 +764,7 @@ temp_operator = "!";
 			yyinitdebug((void YYFAR**)yya, 4);
 #endif
 			{
-#line 301 ".\\myparser.y"
+#line 326 ".\\myparser.y"
 
 		(*(YYSTYPE YYFAR*)yyvalptr) = generate_expr_node();
 		(*(YYSTYPE YYFAR*)yyvalptr)->children[0] = yyattribute(1 - 3);
@@ -762,7 +787,7 @@ temp_operator = "!";
 
 		
 	
-#line 766 "myparser.cpp"
+#line 791 "myparser.cpp"
 			}
 		}
 		break;
@@ -773,7 +798,7 @@ temp_operator = "!";
 			yyinitdebug((void YYFAR**)yya, 4);
 #endif
 			{
-#line 323 ".\\myparser.y"
+#line 348 ".\\myparser.y"
 
 		(*(YYSTYPE YYFAR*)yyvalptr)->code += yyattribute(1 - 3)->code + yyattribute(3 - 3)->code; // 先把孩子的代码加上
 		if(yyattribute(1 - 3)->v_type != yyattribute(3 - 3)->v_type)
@@ -791,7 +816,7 @@ temp_operator = "!";
 
 		
 	
-#line 795 "myparser.cpp"
+#line 820 "myparser.cpp"
 			}
 		}
 		break;
@@ -802,9 +827,9 @@ temp_operator = "!";
 			yyinitdebug((void YYFAR**)yya, 2);
 #endif
 			{
-#line 343 ".\\myparser.y"
+#line 368 ".\\myparser.y"
 (*(YYSTYPE YYFAR*)yyvalptr) = yyattribute(1 - 1);
-#line 808 "myparser.cpp"
+#line 833 "myparser.cpp"
 			}
 		}
 		break;
@@ -815,7 +840,7 @@ temp_operator = "!";
 			yyinitdebug((void YYFAR**)yya, 4);
 #endif
 			{
-#line 344 ".\\myparser.y"
+#line 369 ".\\myparser.y"
 
 		(*(YYSTYPE YYFAR*)yyvalptr) = generate_expr_node();
 		(*(YYSTYPE YYFAR*)yyvalptr)->children[0] = yyattribute(1 - 3);
@@ -833,7 +858,7 @@ temp_operator = "!";
 		(*(YYSTYPE YYFAR*)yyvalptr)->code += generate_expr_code(yyattribute(1 - 3),yyattribute(3 - 3),"<<");
 		(*(YYSTYPE YYFAR*)yyvalptr)->it = temp_top;
 	
-#line 837 "myparser.cpp"
+#line 862 "myparser.cpp"
 			}
 		}
 		break;
@@ -844,7 +869,7 @@ temp_operator = "!";
 			yyinitdebug((void YYFAR**)yya, 4);
 #endif
 			{
-#line 361 ".\\myparser.y"
+#line 386 ".\\myparser.y"
 
 		(*(YYSTYPE YYFAR*)yyvalptr) = generate_expr_node();
 		(*(YYSTYPE YYFAR*)yyvalptr)->children[0] = yyattribute(1 - 3);
@@ -862,7 +887,7 @@ temp_operator = "!";
 		(*(YYSTYPE YYFAR*)yyvalptr)->code += generate_expr_code(yyattribute(1 - 3),yyattribute(3 - 3),">>");
 		(*(YYSTYPE YYFAR*)yyvalptr)->it = temp_top;
 	
-#line 866 "myparser.cpp"
+#line 891 "myparser.cpp"
 			}
 		}
 		break;
@@ -873,9 +898,9 @@ temp_operator = "!";
 			yyinitdebug((void YYFAR**)yya, 2);
 #endif
 			{
-#line 381 ".\\myparser.y"
+#line 406 ".\\myparser.y"
 (*(YYSTYPE YYFAR*)yyvalptr) = yyattribute(1 - 1);
-#line 879 "myparser.cpp"
+#line 904 "myparser.cpp"
 			}
 		}
 		break;
@@ -886,7 +911,7 @@ temp_operator = "!";
 			yyinitdebug((void YYFAR**)yya, 4);
 #endif
 			{
-#line 382 ".\\myparser.y"
+#line 407 ".\\myparser.y"
 
 		(*(YYSTYPE YYFAR*)yyvalptr) = generate_expr_node();
 		(*(YYSTYPE YYFAR*)yyvalptr)->v_type = Boolean;
@@ -898,7 +923,7 @@ temp_operator = "!";
 		(*(YYSTYPE YYFAR*)yyvalptr)->it = temp_top;
 		(*(YYSTYPE YYFAR*)yyvalptr)->end_label = label_number;
 	
-#line 902 "myparser.cpp"
+#line 927 "myparser.cpp"
 			}
 		}
 		break;
@@ -909,7 +934,7 @@ temp_operator = "!";
 			yyinitdebug((void YYFAR**)yya, 4);
 #endif
 			{
-#line 393 ".\\myparser.y"
+#line 418 ".\\myparser.y"
 
 		(*(YYSTYPE YYFAR*)yyvalptr) = generate_expr_node();
 		(*(YYSTYPE YYFAR*)yyvalptr)->v_type = Boolean;
@@ -921,7 +946,7 @@ temp_operator = "!";
 		(*(YYSTYPE YYFAR*)yyvalptr)->it = temp_top;
 		(*(YYSTYPE YYFAR*)yyvalptr)->end_label = label_number;
 	
-#line 925 "myparser.cpp"
+#line 950 "myparser.cpp"
 			}
 		}
 		break;
@@ -932,7 +957,7 @@ temp_operator = "!";
 			yyinitdebug((void YYFAR**)yya, 4);
 #endif
 			{
-#line 404 ".\\myparser.y"
+#line 429 ".\\myparser.y"
 
 		(*(YYSTYPE YYFAR*)yyvalptr) = generate_expr_node();
 		(*(YYSTYPE YYFAR*)yyvalptr)->v_type = Boolean;
@@ -944,7 +969,7 @@ temp_operator = "!";
 		(*(YYSTYPE YYFAR*)yyvalptr)->it = temp_top;
 		(*(YYSTYPE YYFAR*)yyvalptr)->end_label = label_number;
 	
-#line 948 "myparser.cpp"
+#line 973 "myparser.cpp"
 			}
 		}
 		break;
@@ -955,7 +980,7 @@ temp_operator = "!";
 			yyinitdebug((void YYFAR**)yya, 4);
 #endif
 			{
-#line 415 ".\\myparser.y"
+#line 440 ".\\myparser.y"
 
 		(*(YYSTYPE YYFAR*)yyvalptr) = generate_expr_node();
 		(*(YYSTYPE YYFAR*)yyvalptr)->v_type = Boolean;
@@ -967,7 +992,7 @@ temp_operator = "!";
 		(*(YYSTYPE YYFAR*)yyvalptr)->it = temp_top;
 		(*(YYSTYPE YYFAR*)yyvalptr)->end_label = label_number;
 	
-#line 971 "myparser.cpp"
+#line 996 "myparser.cpp"
 			}
 		}
 		break;
@@ -978,9 +1003,9 @@ temp_operator = "!";
 			yyinitdebug((void YYFAR**)yya, 2);
 #endif
 			{
-#line 429 ".\\myparser.y"
+#line 454 ".\\myparser.y"
 (*(YYSTYPE YYFAR*)yyvalptr) = yyattribute(1 - 1);
-#line 984 "myparser.cpp"
+#line 1009 "myparser.cpp"
 			}
 		}
 		break;
@@ -991,7 +1016,7 @@ temp_operator = "!";
 			yyinitdebug((void YYFAR**)yya, 4);
 #endif
 			{
-#line 430 ".\\myparser.y"
+#line 455 ".\\myparser.y"
 
 		(*(YYSTYPE YYFAR*)yyvalptr) = generate_expr_node();
 		(*(YYSTYPE YYFAR*)yyvalptr)->v_type = Boolean;
@@ -1003,7 +1028,7 @@ temp_operator = "!";
 		(*(YYSTYPE YYFAR*)yyvalptr)->it = temp_top;
 		(*(YYSTYPE YYFAR*)yyvalptr)->end_label = label_number;
 	
-#line 1007 "myparser.cpp"
+#line 1032 "myparser.cpp"
 			}
 		}
 		break;
@@ -1014,7 +1039,7 @@ temp_operator = "!";
 			yyinitdebug((void YYFAR**)yya, 4);
 #endif
 			{
-#line 441 ".\\myparser.y"
+#line 466 ".\\myparser.y"
 
 		(*(YYSTYPE YYFAR*)yyvalptr) = generate_expr_node();
 		(*(YYSTYPE YYFAR*)yyvalptr)->v_type = Boolean;
@@ -1026,7 +1051,7 @@ temp_operator = "!";
 		(*(YYSTYPE YYFAR*)yyvalptr)->it = temp_top;
 		(*(YYSTYPE YYFAR*)yyvalptr)->end_label = label_number;
 	
-#line 1030 "myparser.cpp"
+#line 1055 "myparser.cpp"
 			}
 		}
 		break;
@@ -1037,9 +1062,9 @@ temp_operator = "!";
 			yyinitdebug((void YYFAR**)yya, 2);
 #endif
 			{
-#line 455 ".\\myparser.y"
+#line 480 ".\\myparser.y"
 (*(YYSTYPE YYFAR*)yyvalptr) = yyattribute(1 - 1);
-#line 1043 "myparser.cpp"
+#line 1068 "myparser.cpp"
 			}
 		}
 		break;
@@ -1050,7 +1075,7 @@ temp_operator = "!";
 			yyinitdebug((void YYFAR**)yya, 4);
 #endif
 			{
-#line 456 ".\\myparser.y"
+#line 481 ".\\myparser.y"
 
 		(*(YYSTYPE YYFAR*)yyvalptr) = generate_expr_node();
 		(*(YYSTYPE YYFAR*)yyvalptr)->children[0] = yyattribute(1 - 3);
@@ -1070,7 +1095,7 @@ temp_operator = "!";
 
 		
 	
-#line 1074 "myparser.cpp"
+#line 1099 "myparser.cpp"
 			}
 		}
 		break;
@@ -1081,9 +1106,9 @@ temp_operator = "!";
 			yyinitdebug((void YYFAR**)yya, 2);
 #endif
 			{
-#line 478 ".\\myparser.y"
+#line 503 ".\\myparser.y"
 (*(YYSTYPE YYFAR*)yyvalptr) = yyattribute(1 - 1);
-#line 1087 "myparser.cpp"
+#line 1112 "myparser.cpp"
 			}
 		}
 		break;
@@ -1094,7 +1119,7 @@ temp_operator = "!";
 			yyinitdebug((void YYFAR**)yya, 4);
 #endif
 			{
-#line 479 ".\\myparser.y"
+#line 504 ".\\myparser.y"
 
 		(*(YYSTYPE YYFAR*)yyvalptr) = generate_expr_node();
 		(*(YYSTYPE YYFAR*)yyvalptr)->children[0] = yyattribute(1 - 3);
@@ -1112,7 +1137,7 @@ temp_operator = "!";
 		(*(YYSTYPE YYFAR*)yyvalptr)->code += generate_expr_code(yyattribute(1 - 3),yyattribute(3 - 3),"^");
 		(*(YYSTYPE YYFAR*)yyvalptr)->it = temp_top;
 	
-#line 1116 "myparser.cpp"
+#line 1141 "myparser.cpp"
 			}
 		}
 		break;
@@ -1123,9 +1148,9 @@ temp_operator = "!";
 			yyinitdebug((void YYFAR**)yya, 2);
 #endif
 			{
-#line 499 ".\\myparser.y"
+#line 524 ".\\myparser.y"
 (*(YYSTYPE YYFAR*)yyvalptr) = yyattribute(1 - 1);
-#line 1129 "myparser.cpp"
+#line 1154 "myparser.cpp"
 			}
 		}
 		break;
@@ -1136,7 +1161,7 @@ temp_operator = "!";
 			yyinitdebug((void YYFAR**)yya, 4);
 #endif
 			{
-#line 500 ".\\myparser.y"
+#line 525 ".\\myparser.y"
 
 		(*(YYSTYPE YYFAR*)yyvalptr) = generate_expr_node();
 		(*(YYSTYPE YYFAR*)yyvalptr)->children[0] = yyattribute(1 - 3);
@@ -1154,7 +1179,7 @@ temp_operator = "!";
 		(*(YYSTYPE YYFAR*)yyvalptr)->code += generate_expr_code(yyattribute(1 - 3),yyattribute(3 - 3),"|");
 		(*(YYSTYPE YYFAR*)yyvalptr)->it = temp_top;
 	
-#line 1158 "myparser.cpp"
+#line 1183 "myparser.cpp"
 			}
 		}
 		break;
@@ -1165,9 +1190,9 @@ temp_operator = "!";
 			yyinitdebug((void YYFAR**)yya, 2);
 #endif
 			{
-#line 520 ".\\myparser.y"
+#line 545 ".\\myparser.y"
 (*(YYSTYPE YYFAR*)yyvalptr) = yyattribute(1 - 1);
-#line 1171 "myparser.cpp"
+#line 1196 "myparser.cpp"
 			}
 		}
 		break;
@@ -1178,7 +1203,7 @@ temp_operator = "!";
 			yyinitdebug((void YYFAR**)yya, 4);
 #endif
 			{
-#line 521 ".\\myparser.y"
+#line 546 ".\\myparser.y"
 
 		(*(YYSTYPE YYFAR*)yyvalptr) = generate_expr_node();
 		(*(YYSTYPE YYFAR*)yyvalptr)->v_type = Boolean;
@@ -1189,7 +1214,7 @@ temp_operator = "!";
 		(*(YYSTYPE YYFAR*)yyvalptr)->code += generate_and_or_code(yyattribute(1 - 3), yyattribute(3 - 3), "&&");
 		(*(YYSTYPE YYFAR*)yyvalptr)->it = temp_top;
 	
-#line 1193 "myparser.cpp"
+#line 1218 "myparser.cpp"
 			}
 		}
 		break;
@@ -1200,9 +1225,9 @@ temp_operator = "!";
 			yyinitdebug((void YYFAR**)yya, 2);
 #endif
 			{
-#line 534 ".\\myparser.y"
+#line 559 ".\\myparser.y"
 (*(YYSTYPE YYFAR*)yyvalptr) = yyattribute(1 - 1);
-#line 1206 "myparser.cpp"
+#line 1231 "myparser.cpp"
 			}
 		}
 		break;
@@ -1213,7 +1238,7 @@ temp_operator = "!";
 			yyinitdebug((void YYFAR**)yya, 4);
 #endif
 			{
-#line 535 ".\\myparser.y"
+#line 560 ".\\myparser.y"
 
 		(*(YYSTYPE YYFAR*)yyvalptr) = generate_expr_node();
 		(*(YYSTYPE YYFAR*)yyvalptr)->v_type = Boolean;
@@ -1224,7 +1249,7 @@ temp_operator = "!";
 		(*(YYSTYPE YYFAR*)yyvalptr)->code += generate_and_or_code(yyattribute(1 - 3), yyattribute(3 - 3), "||");
 		(*(YYSTYPE YYFAR*)yyvalptr)->it = temp_top;
 	
-#line 1228 "myparser.cpp"
+#line 1253 "myparser.cpp"
 			}
 		}
 		break;
@@ -1235,9 +1260,9 @@ temp_operator = "!";
 			yyinitdebug((void YYFAR**)yya, 2);
 #endif
 			{
-#line 549 ".\\myparser.y"
+#line 574 ".\\myparser.y"
 (*(YYSTYPE YYFAR*)yyvalptr) = yyattribute(1 - 1);
-#line 1241 "myparser.cpp"
+#line 1266 "myparser.cpp"
 			}
 		}
 		break;
@@ -1248,7 +1273,7 @@ temp_operator = "!";
 			yyinitdebug((void YYFAR**)yya, 4);
 #endif
 			{
-#line 550 ".\\myparser.y"
+#line 575 ".\\myparser.y"
 
 		(*(YYSTYPE YYFAR*)yyvalptr) = generate_expr_node();
 		(*(YYSTYPE YYFAR*)yyvalptr)->children[0] = yyattribute(1 - 3);
@@ -1270,7 +1295,7 @@ temp_operator = "!";
 		(*(YYSTYPE YYFAR*)yyvalptr)->it = temp_top;
 
 	
-#line 1274 "myparser.cpp"
+#line 1299 "myparser.cpp"
 			}
 		}
 		break;
@@ -1281,9 +1306,9 @@ temp_operator = "!";
 			yyinitdebug((void YYFAR**)yya, 2);
 #endif
 			{
-#line 574 ".\\myparser.y"
+#line 599 ".\\myparser.y"
 temp_operator = "=";
-#line 1287 "myparser.cpp"
+#line 1312 "myparser.cpp"
 			}
 		}
 		break;
@@ -1294,9 +1319,9 @@ temp_operator = "=";
 			yyinitdebug((void YYFAR**)yya, 2);
 #endif
 			{
-#line 575 ".\\myparser.y"
+#line 600 ".\\myparser.y"
 temp_operator = "*=";
-#line 1300 "myparser.cpp"
+#line 1325 "myparser.cpp"
 			}
 		}
 		break;
@@ -1307,9 +1332,9 @@ temp_operator = "*=";
 			yyinitdebug((void YYFAR**)yya, 2);
 #endif
 			{
-#line 576 ".\\myparser.y"
+#line 601 ".\\myparser.y"
 temp_operator = "/=";
-#line 1313 "myparser.cpp"
+#line 1338 "myparser.cpp"
 			}
 		}
 		break;
@@ -1320,9 +1345,9 @@ temp_operator = "/=";
 			yyinitdebug((void YYFAR**)yya, 2);
 #endif
 			{
-#line 577 ".\\myparser.y"
+#line 602 ".\\myparser.y"
 temp_operator = "%=";
-#line 1326 "myparser.cpp"
+#line 1351 "myparser.cpp"
 			}
 		}
 		break;
@@ -1333,9 +1358,9 @@ temp_operator = "%=";
 			yyinitdebug((void YYFAR**)yya, 2);
 #endif
 			{
-#line 578 ".\\myparser.y"
+#line 603 ".\\myparser.y"
 temp_operator = "+=";
-#line 1339 "myparser.cpp"
+#line 1364 "myparser.cpp"
 			}
 		}
 		break;
@@ -1346,9 +1371,9 @@ temp_operator = "+=";
 			yyinitdebug((void YYFAR**)yya, 2);
 #endif
 			{
-#line 579 ".\\myparser.y"
+#line 604 ".\\myparser.y"
 temp_operator = "-=";
-#line 1352 "myparser.cpp"
+#line 1377 "myparser.cpp"
 			}
 		}
 		break;
@@ -1359,9 +1384,9 @@ temp_operator = "-=";
 			yyinitdebug((void YYFAR**)yya, 2);
 #endif
 			{
-#line 580 ".\\myparser.y"
+#line 605 ".\\myparser.y"
 temp_operator = "<<=";
-#line 1365 "myparser.cpp"
+#line 1390 "myparser.cpp"
 			}
 		}
 		break;
@@ -1372,9 +1397,9 @@ temp_operator = "<<=";
 			yyinitdebug((void YYFAR**)yya, 2);
 #endif
 			{
-#line 581 ".\\myparser.y"
+#line 606 ".\\myparser.y"
 temp_operator = ">>=";
-#line 1378 "myparser.cpp"
+#line 1403 "myparser.cpp"
 			}
 		}
 		break;
@@ -1385,9 +1410,9 @@ temp_operator = ">>=";
 			yyinitdebug((void YYFAR**)yya, 2);
 #endif
 			{
-#line 582 ".\\myparser.y"
+#line 607 ".\\myparser.y"
 temp_operator = "&=";
-#line 1391 "myparser.cpp"
+#line 1416 "myparser.cpp"
 			}
 		}
 		break;
@@ -1398,9 +1423,9 @@ temp_operator = "&=";
 			yyinitdebug((void YYFAR**)yya, 2);
 #endif
 			{
-#line 583 ".\\myparser.y"
+#line 608 ".\\myparser.y"
 temp_operator = "^=";
-#line 1404 "myparser.cpp"
+#line 1429 "myparser.cpp"
 			}
 		}
 		break;
@@ -1411,9 +1436,9 @@ temp_operator = "^=";
 			yyinitdebug((void YYFAR**)yya, 2);
 #endif
 			{
-#line 584 ".\\myparser.y"
+#line 609 ".\\myparser.y"
 temp_operator = "|=";
-#line 1417 "myparser.cpp"
+#line 1442 "myparser.cpp"
 			}
 		}
 		break;
@@ -1424,9 +1449,9 @@ temp_operator = "|=";
 			yyinitdebug((void YYFAR**)yya, 2);
 #endif
 			{
-#line 588 ".\\myparser.y"
+#line 613 ".\\myparser.y"
 (*(YYSTYPE YYFAR*)yyvalptr) = yyattribute(1 - 1);
-#line 1430 "myparser.cpp"
+#line 1455 "myparser.cpp"
 			}
 		}
 		break;
@@ -1437,12 +1462,12 @@ temp_operator = "|=";
 			yyinitdebug((void YYFAR**)yya, 4);
 #endif
 			{
-#line 589 ".\\myparser.y"
+#line 614 ".\\myparser.y"
 
 		// 和 list的处理方法一样
 
 	
-#line 1446 "myparser.cpp"
+#line 1471 "myparser.cpp"
 			}
 		}
 		break;
@@ -1453,7 +1478,7 @@ temp_operator = "|=";
 			yyinitdebug((void YYFAR**)yya, 4);
 #endif
 			{
-#line 600 ".\\myparser.y"
+#line 625 ".\\myparser.y"
 
 		// 变量声明语句
 		// 遍历init_declarator_list, 把所有项加入符号表
@@ -1485,7 +1510,7 @@ temp_operator = "|=";
 		}
 		// 怎样保留那些需要复杂初始化的代码呢
 	
-#line 1489 "myparser.cpp"
+#line 1514 "myparser.cpp"
 			}
 		}
 		break;
@@ -1496,9 +1521,9 @@ temp_operator = "|=";
 			yyinitdebug((void YYFAR**)yya, 2);
 #endif
 			{
-#line 634 ".\\myparser.y"
+#line 659 ".\\myparser.y"
 (*(YYSTYPE YYFAR*)yyvalptr) = yyattribute(1 - 1);
-#line 1502 "myparser.cpp"
+#line 1527 "myparser.cpp"
 			}
 		}
 		break;
@@ -1509,9 +1534,9 @@ temp_operator = "|=";
 			yyinitdebug((void YYFAR**)yya, 2);
 #endif
 			{
-#line 639 ".\\myparser.y"
+#line 664 ".\\myparser.y"
 (*(YYSTYPE YYFAR*)yyvalptr) = yyattribute(1 - 1); 
-#line 1515 "myparser.cpp"
+#line 1540 "myparser.cpp"
 			}
 		}
 		break;
@@ -1522,7 +1547,7 @@ temp_operator = "|=";
 			yyinitdebug((void YYFAR**)yya, 4);
 #endif
 			{
-#line 640 ".\\myparser.y"
+#line 665 ".\\myparser.y"
 
 		(*(YYSTYPE YYFAR*)yyvalptr) = yyattribute(1 - 3);
 		Node*temp = (*(YYSTYPE YYFAR*)yyvalptr);
@@ -1530,7 +1555,7 @@ temp_operator = "|=";
 			temp = temp->sibing;
 		temp->sibing = yyattribute(3 - 3);
 	
-#line 1534 "myparser.cpp"
+#line 1559 "myparser.cpp"
 			}
 		}
 		break;
@@ -1541,14 +1566,14 @@ temp_operator = "|=";
 			yyinitdebug((void YYFAR**)yya, 2);
 #endif
 			{
-#line 650 ".\\myparser.y"
+#line 675 ".\\myparser.y"
 
 		// a
 		(*(YYSTYPE YYFAR*)yyvalptr) = yyattribute(1 - 1);
 		// 存入符号表，状态为未初始化
 		(*(YYSTYPE YYFAR*)yyvalptr)->state = Not_Init;
 	
-#line 1552 "myparser.cpp"
+#line 1577 "myparser.cpp"
 			}
 		}
 		break;
@@ -1559,7 +1584,7 @@ temp_operator = "|=";
 			yyinitdebug((void YYFAR**)yya, 4);
 #endif
 			{
-#line 656 ".\\myparser.y"
+#line 681 ".\\myparser.y"
 
 		// a=1
 		// 如果用常量初始化，则$3->has_value=true
@@ -1580,7 +1605,7 @@ temp_operator = "|=";
 		}
 
 	
-#line 1584 "myparser.cpp"
+#line 1609 "myparser.cpp"
 			}
 		}
 		break;
@@ -1591,9 +1616,9 @@ temp_operator = "|=";
 			yyinitdebug((void YYFAR**)yya, 2);
 #endif
 			{
-#line 680 ".\\myparser.y"
+#line 705 ".\\myparser.y"
 
-#line 1597 "myparser.cpp"
+#line 1622 "myparser.cpp"
 			}
 		}
 		break;
@@ -1604,9 +1629,9 @@ temp_operator = "|=";
 			yyinitdebug((void YYFAR**)yya, 2);
 #endif
 			{
-#line 681 ".\\myparser.y"
+#line 706 ".\\myparser.y"
 (*(YYSTYPE YYFAR*)yyvalptr) = new Node();(*(YYSTYPE YYFAR*)yyvalptr)->v_type = Char;
-#line 1610 "myparser.cpp"
+#line 1635 "myparser.cpp"
 			}
 		}
 		break;
@@ -1617,9 +1642,9 @@ temp_operator = "|=";
 			yyinitdebug((void YYFAR**)yya, 2);
 #endif
 			{
-#line 682 ".\\myparser.y"
+#line 707 ".\\myparser.y"
 (*(YYSTYPE YYFAR*)yyvalptr) = new Node();(*(YYSTYPE YYFAR*)yyvalptr)->v_type = Integer;
-#line 1623 "myparser.cpp"
+#line 1648 "myparser.cpp"
 			}
 		}
 		break;
@@ -1630,9 +1655,9 @@ temp_operator = "|=";
 			yyinitdebug((void YYFAR**)yya, 2);
 #endif
 			{
-#line 683 ".\\myparser.y"
+#line 708 ".\\myparser.y"
 (*(YYSTYPE YYFAR*)yyvalptr) = new Node();(*(YYSTYPE YYFAR*)yyvalptr)->v_type = Double;
-#line 1636 "myparser.cpp"
+#line 1661 "myparser.cpp"
 			}
 		}
 		break;
@@ -1643,9 +1668,9 @@ temp_operator = "|=";
 			yyinitdebug((void YYFAR**)yya, 2);
 #endif
 			{
-#line 684 ".\\myparser.y"
+#line 709 ".\\myparser.y"
 (*(YYSTYPE YYFAR*)yyvalptr) = new Node();(*(YYSTYPE YYFAR*)yyvalptr)->v_type = Boolean;
-#line 1649 "myparser.cpp"
+#line 1674 "myparser.cpp"
 			}
 		}
 		break;
@@ -1656,11 +1681,11 @@ temp_operator = "|=";
 			yyinitdebug((void YYFAR**)yya, 6);
 #endif
 			{
-#line 690 ".\\myparser.y"
+#line 715 ".\\myparser.y"
 
 		//cout<<"struct!"<<endl;
 	
-#line 1664 "myparser.cpp"
+#line 1689 "myparser.cpp"
 			}
 		}
 		break;
@@ -1671,13 +1696,13 @@ temp_operator = "|=";
 			yyinitdebug((void YYFAR**)yya, 3);
 #endif
 			{
-#line 730 ".\\myparser.y"
+#line 755 ".\\myparser.y"
 
 		// declarator *a
 		(*(YYSTYPE YYFAR*)yyvalptr)->name = yyattribute(2 - 2)->name;
 		(*(YYSTYPE YYFAR*)yyvalptr)->nd_type = ID_t;
 	
-#line 1681 "myparser.cpp"
+#line 1706 "myparser.cpp"
 			}
 		}
 		break;
@@ -1688,12 +1713,12 @@ temp_operator = "|=";
 			yyinitdebug((void YYFAR**)yya, 2);
 #endif
 			{
-#line 735 ".\\myparser.y"
+#line 760 ".\\myparser.y"
 
 		// a
 		(*(YYSTYPE YYFAR*)yyvalptr) = yyattribute(1 - 1);
 	
-#line 1697 "myparser.cpp"
+#line 1722 "myparser.cpp"
 			}
 		}
 		break;
@@ -1704,12 +1729,12 @@ temp_operator = "|=";
 			yyinitdebug((void YYFAR**)yya, 2);
 #endif
 			{
-#line 743 ".\\myparser.y"
+#line 768 ".\\myparser.y"
 
 		(*(YYSTYPE YYFAR*)yyvalptr) = yyattribute(1 - 1);
 		// cout<< "声明语句标识符"<<endl;
 	
-#line 1713 "myparser.cpp"
+#line 1738 "myparser.cpp"
 			}
 		}
 		break;
@@ -1720,12 +1745,12 @@ temp_operator = "|=";
 			yyinitdebug((void YYFAR**)yya, 5);
 #endif
 			{
-#line 751 ".\\myparser.y"
+#line 776 ".\\myparser.y"
 
 		// 带参函数的声明
 		(*(YYSTYPE YYFAR*)yyvalptr) = yyattribute(1 - 4);
 	
-#line 1729 "myparser.cpp"
+#line 1754 "myparser.cpp"
 			}
 		}
 		break;
@@ -1736,11 +1761,11 @@ temp_operator = "|=";
 			yyinitdebug((void YYFAR**)yya, 4);
 #endif
 			{
-#line 756 ".\\myparser.y"
+#line 781 ".\\myparser.y"
 
 		// 无参函数的声明和调用
 	
-#line 1744 "myparser.cpp"
+#line 1769 "myparser.cpp"
 			}
 		}
 		break;
@@ -1751,9 +1776,9 @@ temp_operator = "|=";
 			yyinitdebug((void YYFAR**)yya, 2);
 #endif
 			{
-#line 762 ".\\myparser.y"
+#line 787 ".\\myparser.y"
 (*(YYSTYPE YYFAR*)yyvalptr) = generate_pointer_node();
-#line 1757 "myparser.cpp"
+#line 1782 "myparser.cpp"
 			}
 		}
 		break;
@@ -1764,12 +1789,12 @@ temp_operator = "|=";
 			yyinitdebug((void YYFAR**)yya, 3);
 #endif
 			{
-#line 763 ".\\myparser.y"
+#line 788 ".\\myparser.y"
 
 		(*(YYSTYPE YYFAR*)yyvalptr) = yyattribute(1 - 2);
 		(*(YYSTYPE YYFAR*)yyvalptr)->p_depth++;
 	
-#line 1773 "myparser.cpp"
+#line 1798 "myparser.cpp"
 			}
 		}
 		break;
@@ -1780,7 +1805,7 @@ temp_operator = "|=";
 			yyinitdebug((void YYFAR**)yya, 4);
 #endif
 			{
-#line 775 ".\\myparser.y"
+#line 800 ".\\myparser.y"
 
 		(*(YYSTYPE YYFAR*)yyvalptr) = yyattribute(1 - 3);
 		Node* temp = yyattribute(1 - 3);
@@ -1789,7 +1814,7 @@ temp_operator = "|=";
 		}
 		temp->sibing = yyattribute(3 - 3);
 	
-#line 1793 "myparser.cpp"
+#line 1818 "myparser.cpp"
 			}
 		}
 		break;
@@ -1800,13 +1825,13 @@ temp_operator = "|=";
 			yyinitdebug((void YYFAR**)yya, 3);
 #endif
 			{
-#line 786 ".\\myparser.y"
+#line 811 ".\\myparser.y"
 
 		// 参数类型和参数标识符
 		(*(YYSTYPE YYFAR*)yyvalptr) = yyattribute(1 - 2);
 		Temp_Table[yyattribute(2 - 2)->name] = yyattribute(1 - 2)->v_type;
 	
-#line 1810 "myparser.cpp"
+#line 1835 "myparser.cpp"
 			}
 		}
 		break;
@@ -1817,12 +1842,12 @@ temp_operator = "|=";
 			yyinitdebug((void YYFAR**)yya, 2);
 #endif
 			{
-#line 822 ".\\myparser.y"
+#line 847 ".\\myparser.y"
 
 		// 秀啊，还用表达式来初始化，那初始化值就是没有的了
 		(*(YYSTYPE YYFAR*)yyvalptr) = yyattribute(1 - 1);
 	
-#line 1826 "myparser.cpp"
+#line 1851 "myparser.cpp"
 			}
 		}
 		break;
@@ -1833,9 +1858,9 @@ temp_operator = "|=";
 			yyinitdebug((void YYFAR**)yya, 4);
 #endif
 			{
-#line 847 ".\\myparser.y"
+#line 872 ".\\myparser.y"
 
-#line 1839 "myparser.cpp"
+#line 1864 "myparser.cpp"
 			}
 		}
 		break;
@@ -1846,9 +1871,9 @@ temp_operator = "|=";
 			yyinitdebug((void YYFAR**)yya, 2);
 #endif
 			{
-#line 852 ".\\myparser.y"
+#line 877 ".\\myparser.y"
  (*(YYSTYPE YYFAR*)yyvalptr) = yyattribute(1 - 1);
-#line 1852 "myparser.cpp"
+#line 1877 "myparser.cpp"
 			}
 		}
 		break;
@@ -1859,9 +1884,9 @@ temp_operator = "|=";
 			yyinitdebug((void YYFAR**)yya, 2);
 #endif
 			{
-#line 853 ".\\myparser.y"
+#line 878 ".\\myparser.y"
 (*(YYSTYPE YYFAR*)yyvalptr) = yyattribute(1 - 1);
-#line 1865 "myparser.cpp"
+#line 1890 "myparser.cpp"
 			}
 		}
 		break;
@@ -1872,9 +1897,9 @@ temp_operator = "|=";
 			yyinitdebug((void YYFAR**)yya, 2);
 #endif
 			{
-#line 854 ".\\myparser.y"
+#line 879 ".\\myparser.y"
 (*(YYSTYPE YYFAR*)yyvalptr) = yyattribute(1 - 1);
-#line 1878 "myparser.cpp"
+#line 1903 "myparser.cpp"
 			}
 		}
 		break;
@@ -1885,9 +1910,9 @@ temp_operator = "|=";
 			yyinitdebug((void YYFAR**)yya, 2);
 #endif
 			{
-#line 855 ".\\myparser.y"
+#line 880 ".\\myparser.y"
 (*(YYSTYPE YYFAR*)yyvalptr) = yyattribute(1 - 1);
-#line 1891 "myparser.cpp"
+#line 1916 "myparser.cpp"
 			}
 		}
 		break;
@@ -1898,7 +1923,7 @@ temp_operator = "|=";
 			yyinitdebug((void YYFAR**)yya, 4);
 #endif
 			{
-#line 863 ".\\myparser.y"
+#line 888 ".\\myparser.y"
 
 		(*(YYSTYPE YYFAR*)yyvalptr) = generate_stmt_node();
 		Node*temp = yyattribute(2 - 3);
@@ -1907,7 +1932,7 @@ temp_operator = "|=";
 			temp = temp->sibing;
 		}
 	
-#line 1911 "myparser.cpp"
+#line 1936 "myparser.cpp"
 			}
 		}
 		break;
@@ -1918,9 +1943,9 @@ temp_operator = "|=";
 			yyinitdebug((void YYFAR**)yya, 2);
 #endif
 			{
-#line 874 ".\\myparser.y"
+#line 899 ".\\myparser.y"
 (*(YYSTYPE YYFAR*)yyvalptr) = yyattribute(1 - 1);
-#line 1924 "myparser.cpp"
+#line 1949 "myparser.cpp"
 			}
 		}
 		break;
@@ -1931,7 +1956,7 @@ temp_operator = "|=";
 			yyinitdebug((void YYFAR**)yya, 3);
 #endif
 			{
-#line 875 ".\\myparser.y"
+#line 900 ".\\myparser.y"
 
 		// 要串起来
 		(*(YYSTYPE YYFAR*)yyvalptr) = yyattribute(1 - 2);
@@ -1940,7 +1965,7 @@ temp_operator = "|=";
 			temp = temp->sibing;
 		temp->sibing = yyattribute(2 - 2);
 	
-#line 1944 "myparser.cpp"
+#line 1969 "myparser.cpp"
 			}
 		}
 		break;
@@ -1951,9 +1976,9 @@ temp_operator = "|=";
 			yyinitdebug((void YYFAR**)yya, 2);
 #endif
 			{
-#line 886 ".\\myparser.y"
+#line 911 ".\\myparser.y"
 (*(YYSTYPE YYFAR*)yyvalptr) = yyattribute(1 - 1);
-#line 1957 "myparser.cpp"
+#line 1982 "myparser.cpp"
 			}
 		}
 		break;
@@ -1964,9 +1989,9 @@ temp_operator = "|=";
 			yyinitdebug((void YYFAR**)yya, 2);
 #endif
 			{
-#line 887 ".\\myparser.y"
+#line 912 ".\\myparser.y"
 (*(YYSTYPE YYFAR*)yyvalptr) = yyattribute(1 - 1);
-#line 1970 "myparser.cpp"
+#line 1995 "myparser.cpp"
 			}
 		}
 		break;
@@ -1977,9 +2002,9 @@ temp_operator = "|=";
 			yyinitdebug((void YYFAR**)yya, 2);
 #endif
 			{
-#line 891 ".\\myparser.y"
+#line 916 ".\\myparser.y"
 (*(YYSTYPE YYFAR*)yyvalptr) = generate_stmt_node();
-#line 1983 "myparser.cpp"
+#line 2008 "myparser.cpp"
 			}
 		}
 		break;
@@ -1990,11 +2015,11 @@ temp_operator = "|=";
 			yyinitdebug((void YYFAR**)yya, 3);
 #endif
 			{
-#line 892 ".\\myparser.y"
+#line 917 ".\\myparser.y"
 
 		(*(YYSTYPE YYFAR*)yyvalptr) = yyattribute(1 - 2);
 	
-#line 1998 "myparser.cpp"
+#line 2023 "myparser.cpp"
 			}
 		}
 		break;
@@ -2005,14 +2030,14 @@ temp_operator = "|=";
 			yyinitdebug((void YYFAR**)yya, 6);
 #endif
 			{
-#line 898 ".\\myparser.y"
+#line 923 ".\\myparser.y"
 
 		(*(YYSTYPE YYFAR*)yyvalptr) = generate_stmt_node();
 		(*(YYSTYPE YYFAR*)yyvalptr)->children[0] = yyattribute(3 - 5);
 		(*(YYSTYPE YYFAR*)yyvalptr)->children[1] = yyattribute(5 - 5);
 		(*(YYSTYPE YYFAR*)yyvalptr)->code += generate_if_code(yyattribute(3 - 5),yyattribute(5 - 5),NULL);
 	
-#line 2016 "myparser.cpp"
+#line 2041 "myparser.cpp"
 			}
 		}
 		break;
@@ -2023,7 +2048,7 @@ temp_operator = "|=";
 			yyinitdebug((void YYFAR**)yya, 8);
 #endif
 			{
-#line 904 ".\\myparser.y"
+#line 929 ".\\myparser.y"
 
 		(*(YYSTYPE YYFAR*)yyvalptr) = generate_stmt_node();
 		(*(YYSTYPE YYFAR*)yyvalptr)->children[0] = yyattribute(3 - 7);
@@ -2031,7 +2056,7 @@ temp_operator = "|=";
 		(*(YYSTYPE YYFAR*)yyvalptr)->children[2] = yyattribute(7 - 7);
 		(*(YYSTYPE YYFAR*)yyvalptr)->code += generate_if_code(yyattribute(3 - 7),yyattribute(5 - 7),yyattribute(7 - 7));
 	
-#line 2035 "myparser.cpp"
+#line 2060 "myparser.cpp"
 			}
 		}
 		break;
@@ -2042,7 +2067,7 @@ temp_operator = "|=";
 			yyinitdebug((void YYFAR**)yya, 6);
 #endif
 			{
-#line 914 ".\\myparser.y"
+#line 939 ".\\myparser.y"
 
 		(*(YYSTYPE YYFAR*)yyvalptr) = generate_stmt_node();
 		(*(YYSTYPE YYFAR*)yyvalptr)->children[0] = yyattribute(3 - 5);
@@ -2058,7 +2083,7 @@ temp_operator = "|=";
 		(*(YYSTYPE YYFAR*)yyvalptr)->code += "\tjne L" + to_string(label_number-1) + "\n";
 		label_number++;
 	
-#line 2062 "myparser.cpp"
+#line 2087 "myparser.cpp"
 			}
 		}
 		break;
@@ -2069,7 +2094,7 @@ temp_operator = "|=";
 			yyinitdebug((void YYFAR**)yya, 8);
 #endif
 			{
-#line 929 ".\\myparser.y"
+#line 954 ".\\myparser.y"
 
 		(*(YYSTYPE YYFAR*)yyvalptr) = generate_stmt_node();
 		(*(YYSTYPE YYFAR*)yyvalptr)->children[0] = yyattribute(2 - 7);
@@ -2085,7 +2110,7 @@ temp_operator = "|=";
 		(*(YYSTYPE YYFAR*)yyvalptr)->code += "\tjne L" + to_string(label_number-1) + "\n";
 		label_number++;
 	
-#line 2089 "myparser.cpp"
+#line 2114 "myparser.cpp"
 			}
 		}
 		break;
@@ -2096,7 +2121,7 @@ temp_operator = "|=";
 			yyinitdebug((void YYFAR**)yya, 7);
 #endif
 			{
-#line 944 ".\\myparser.y"
+#line 969 ".\\myparser.y"
 
 		(*(YYSTYPE YYFAR*)yyvalptr) = generate_stmt_node();
 		(*(YYSTYPE YYFAR*)yyvalptr)->children[0] = yyattribute(3 - 6);
@@ -2116,7 +2141,7 @@ temp_operator = "|=";
 		(*(YYSTYPE YYFAR*)yyvalptr)->code += "\tjne L" + to_string(label_number-1) + "\n";
 		label_number++;
 	
-#line 2120 "myparser.cpp"
+#line 2145 "myparser.cpp"
 			}
 		}
 		break;
@@ -2127,7 +2152,7 @@ temp_operator = "|=";
 			yyinitdebug((void YYFAR**)yya, 8);
 #endif
 			{
-#line 963 ".\\myparser.y"
+#line 988 ".\\myparser.y"
 
 		(*(YYSTYPE YYFAR*)yyvalptr) = generate_stmt_node();
 		(*(YYSTYPE YYFAR*)yyvalptr)->children[0] = yyattribute(3 - 7);
@@ -2148,7 +2173,7 @@ temp_operator = "|=";
 		(*(YYSTYPE YYFAR*)yyvalptr)->code += "\tjne L" + to_string(label_number-1) + "\n";
 		label_number++;
 	
-#line 2152 "myparser.cpp"
+#line 2177 "myparser.cpp"
 			}
 		}
 		break;
@@ -2159,7 +2184,7 @@ temp_operator = "|=";
 			yyinitdebug((void YYFAR**)yya, 7);
 #endif
 			{
-#line 983 ".\\myparser.y"
+#line 1008 ".\\myparser.y"
 
 		(*(YYSTYPE YYFAR*)yyvalptr) = generate_stmt_node();
 		(*(YYSTYPE YYFAR*)yyvalptr)->children[0] = yyattribute(3 - 6);
@@ -2178,7 +2203,7 @@ temp_operator = "|=";
 		(*(YYSTYPE YYFAR*)yyvalptr)->code += "\tjne L" + to_string(label_number-1) + "\n";
 		label_number++;
 	
-#line 2182 "myparser.cpp"
+#line 2207 "myparser.cpp"
 			}
 		}
 		break;
@@ -2189,7 +2214,7 @@ temp_operator = "|=";
 			yyinitdebug((void YYFAR**)yya, 8);
 #endif
 			{
-#line 1001 ".\\myparser.y"
+#line 1026 ".\\myparser.y"
 
 		(*(YYSTYPE YYFAR*)yyvalptr) = generate_stmt_node();
 		(*(YYSTYPE YYFAR*)yyvalptr)->children[0] = yyattribute(3 - 7);
@@ -2210,7 +2235,7 @@ temp_operator = "|=";
 		(*(YYSTYPE YYFAR*)yyvalptr)->code += "\tjne L" + to_string(label_number-1) + "\n";
 		label_number++;
 	
-#line 2214 "myparser.cpp"
+#line 2239 "myparser.cpp"
 			}
 		}
 		break;
@@ -2221,12 +2246,12 @@ temp_operator = "|=";
 			yyinitdebug((void YYFAR**)yya, 3);
 #endif
 			{
-#line 1026 ".\\myparser.y"
+#line 1051 ".\\myparser.y"
 
 		(*(YYSTYPE YYFAR*)yyvalptr) = generate_stmt_node();
 		(*(YYSTYPE YYFAR*)yyvalptr)->code += "\tret\n";
 	
-#line 2230 "myparser.cpp"
+#line 2255 "myparser.cpp"
 			}
 		}
 		break;
@@ -2237,7 +2262,7 @@ temp_operator = "|=";
 			yyinitdebug((void YYFAR**)yya, 4);
 #endif
 			{
-#line 1030 ".\\myparser.y"
+#line 1055 ".\\myparser.y"
 
 		(*(YYSTYPE YYFAR*)yyvalptr) = generate_stmt_node();
 		(*(YYSTYPE YYFAR*)yyvalptr)->code += yyattribute(2 - 3)->code;
@@ -2256,7 +2281,7 @@ temp_operator = "|=";
 			}
 		}
 	
-#line 2260 "myparser.cpp"
+#line 2285 "myparser.cpp"
 			}
 		}
 		break;
@@ -2267,7 +2292,7 @@ temp_operator = "|=";
 			yyinitdebug((void YYFAR**)yya, 2);
 #endif
 			{
-#line 1051 ".\\myparser.y"
+#line 1076 ".\\myparser.y"
 
 		cout<<generate_header();
 		cout<<generate_var_define();
@@ -2278,7 +2303,7 @@ temp_operator = "|=";
 		}
 		cout<<"end start"<<endl;
 	
-#line 2282 "myparser.cpp"
+#line 2307 "myparser.cpp"
 			}
 		}
 		break;
@@ -2289,9 +2314,9 @@ temp_operator = "|=";
 			yyinitdebug((void YYFAR**)yya, 2);
 #endif
 			{
-#line 1064 ".\\myparser.y"
+#line 1089 ".\\myparser.y"
 (*(YYSTYPE YYFAR*)yyvalptr) = yyattribute(1 - 1); 
-#line 2295 "myparser.cpp"
+#line 2320 "myparser.cpp"
 			}
 		}
 		break;
@@ -2302,7 +2327,7 @@ temp_operator = "|=";
 			yyinitdebug((void YYFAR**)yya, 3);
 #endif
 			{
-#line 1065 ".\\myparser.y"
+#line 1090 ".\\myparser.y"
 
 		(*(YYSTYPE YYFAR*)yyvalptr) = yyattribute(1 - 2);
 		Node * temp = (*(YYSTYPE YYFAR*)yyvalptr);
@@ -2311,7 +2336,7 @@ temp_operator = "|=";
 		}
 		temp->sibing = yyattribute(2 - 2);
 	
-#line 2315 "myparser.cpp"
+#line 2340 "myparser.cpp"
 			}
 		}
 		break;
@@ -2322,9 +2347,9 @@ temp_operator = "|=";
 			yyinitdebug((void YYFAR**)yya, 2);
 #endif
 			{
-#line 1076 ".\\myparser.y"
+#line 1101 ".\\myparser.y"
  (*(YYSTYPE YYFAR*)yyvalptr) = yyattribute(1 - 1);
-#line 2328 "myparser.cpp"
+#line 2353 "myparser.cpp"
 			}
 		}
 		break;
@@ -2335,11 +2360,11 @@ temp_operator = "|=";
 			yyinitdebug((void YYFAR**)yya, 5);
 #endif
 			{
-#line 1081 ".\\myparser.y"
+#line 1106 ".\\myparser.y"
 
 
 	
-#line 2343 "myparser.cpp"
+#line 2368 "myparser.cpp"
 			}
 		}
 		break;
@@ -2350,7 +2375,7 @@ temp_operator = "|=";
 			yyinitdebug((void YYFAR**)yya, 4);
 #endif
 			{
-#line 1084 ".\\myparser.y"
+#line 1109 ".\\myparser.y"
 
 		// 无参函数定义
 		(*(YYSTYPE YYFAR*)yyvalptr) = generate_stmt_node();
@@ -2366,7 +2391,7 @@ temp_operator = "|=";
 		(*(YYSTYPE YYFAR*)yyvalptr)->code += yyattribute(2 - 3)->name + " endp\n\n";
 		Temp_Table.clear();
 	
-#line 2370 "myparser.cpp"
+#line 2395 "myparser.cpp"
 			}
 		}
 		break;
@@ -2377,11 +2402,11 @@ temp_operator = "|=";
 			yyinitdebug((void YYFAR**)yya, 2);
 #endif
 			{
-#line 1102 ".\\myparser.y"
+#line 1127 ".\\myparser.y"
 
 
 	
-#line 2385 "myparser.cpp"
+#line 2410 "myparser.cpp"
 			}
 		}
 		break;
@@ -2392,11 +2417,11 @@ temp_operator = "|=";
 			yyinitdebug((void YYFAR**)yya, 3);
 #endif
 			{
-#line 1105 ".\\myparser.y"
+#line 1130 ".\\myparser.y"
 
 
 	
-#line 2400 "myparser.cpp"
+#line 2425 "myparser.cpp"
 			}
 		}
 		break;
@@ -2848,52 +2873,52 @@ void YYPARSERNAME::yytables()
 	static const yytokenaction_t YYNEARFAR YYBASED_CODE tokenaction[] = {
 		{ 286, YYAT_SHIFT, 49 },
 		{ 242, YYAT_SHIFT, 264 },
-		{ 64, YYAT_SHIFT, 134 },
-		{ 96, YYAT_SHIFT, 175 },
+		{ 76, YYAT_SHIFT, 153 },
+		{ 94, YYAT_SHIFT, 173 },
 		{ 193, YYAT_SHIFT, 19 },
 		{ 286, YYAT_SHIFT, 50 },
 		{ 193, YYAT_SHIFT, 20 },
 		{ 286, YYAT_SHIFT, 51 },
-		{ 14, YYAT_SHIFT, 27 },
+		{ 13, YYAT_SHIFT, 27 },
 		{ 286, YYAT_SHIFT, 52 },
-		{ 22, YYAT_SHIFT, 32 },
+		{ 23, YYAT_SHIFT, 32 },
 		{ 243, YYAT_SHIFT, 266 },
 		{ 286, YYAT_SHIFT, 53 },
-		{ 200, YYAT_SHIFT, 120 },
-		{ 124, YYAT_SHIFT, 200 },
+		{ 199, YYAT_SHIFT, 120 },
+		{ 123, YYAT_SHIFT, 199 },
 		{ 241, YYAT_SHIFT, 242 },
 		{ 259, YYAT_SHIFT, 276 },
-		{ 62, YYAT_SHIFT, 129 },
-		{ 212, YYAT_SHIFT, 150 },
+		{ 72, YYAT_SHIFT, 147 },
+		{ 215, YYAT_SHIFT, 129 },
 		{ 182, YYAT_SHIFT, 242 },
-		{ 212, YYAT_SHIFT, 151 },
+		{ 215, YYAT_SHIFT, 130 },
 		{ 282, YYAT_SHIFT, 288 },
 		{ 193, YYAT_SHIFT, 112 },
-		{ 62, YYAT_SHIFT, 130 },
+		{ 72, YYAT_SHIFT, 148 },
 		{ 178, YYAT_SHIFT, 238 },
-		{ 42, YYAT_SHIFT, 108 },
+		{ 42, YYAT_SHIFT, 40 },
 		{ 286, YYAT_SHIFT, 77 },
-		{ 40, YYAT_SHIFT, 41 },
-		{ 26, YYAT_SHIFT, 41 },
-		{ 125, YYAT_SHIFT, 120 },
+		{ 41, YYAT_SHIFT, 108 },
+		{ 25, YYAT_SHIFT, 40 },
+		{ 124, YYAT_SHIFT, 120 },
 		{ 275, YYAT_SHIFT, 284 },
 		{ 177, YYAT_SHIFT, 177 },
 		{ 177, YYAT_SHIFT, 235 },
 		{ 177, YYAT_SHIFT, 20 },
 		{ 259, YYAT_ERROR, 0 },
 		{ 103, YYAT_SHIFT, 177 },
-		{ 180, YYAT_SHIFT, 177 },
+		{ 181, YYAT_SHIFT, 177 },
 		{ 103, YYAT_SHIFT, 20 },
-		{ 41, YYAT_SHIFT, 101 },
-		{ 208, YYAT_SHIFT, 173 },
+		{ 40, YYAT_SHIFT, 101 },
+		{ 226, YYAT_SHIFT, 175 },
 		{ 277, YYAT_SHIFT, 286 },
-		{ 172, YYAT_SHIFT, 173 },
-		{ 114, YYAT_SHIFT, 193 },
-		{ 277, YYAT_SHIFT, 173 },
-		{ 125, YYAT_SHIFT, 202 },
-		{ 211, YYAT_SHIFT, 150 },
+		{ 172, YYAT_SHIFT, 175 },
+		{ 115, YYAT_SHIFT, 193 },
+		{ 277, YYAT_SHIFT, 175 },
+		{ 124, YYAT_SHIFT, 201 },
+		{ 214, YYAT_SHIFT, 129 },
 		{ 24, YYAT_SHIFT, 38 },
-		{ 211, YYAT_SHIFT, 151 },
+		{ 214, YYAT_SHIFT, 130 },
 		{ 168, YYAT_SHIFT, 1 },
 		{ 168, YYAT_SHIFT, 2 },
 		{ 168, YYAT_SHIFT, 3 },
@@ -2903,47 +2928,47 @@ void YYPARSERNAME::yytables()
 		{ 168, YYAT_SHIFT, 7 },
 		{ 168, YYAT_SHIFT, 8 },
 		{ 172, YYAT_SHIFT, 233 },
-		{ 114, YYAT_SHIFT, 194 },
-		{ 200, YYAT_SHIFT, 121 },
+		{ 115, YYAT_SHIFT, 194 },
+		{ 199, YYAT_SHIFT, 121 },
 		{ 273, YYAT_SHIFT, 282 },
-		{ 205, YYAT_SHIFT, 252 },
+		{ 223, YYAT_SHIFT, 252 },
 		{ 24, YYAT_SHIFT, 39 },
 		{ 243, YYAT_SHIFT, 267 },
-		{ 205, YYAT_SHIFT, 253 },
-		{ 226, YYAT_SHIFT, 148 },
-		{ 226, YYAT_SHIFT, 149 },
+		{ 223, YYAT_SHIFT, 253 },
+		{ 219, YYAT_SHIFT, 139 },
+		{ 219, YYAT_SHIFT, 140 },
 		{ 241, YYAT_SHIFT, 243 },
-		{ 68, YYAT_SHIFT, 150 },
-		{ 62, YYAT_SHIFT, 131 },
-		{ 68, YYAT_SHIFT, 151 },
+		{ 61, YYAT_SHIFT, 129 },
+		{ 72, YYAT_SHIFT, 149 },
+		{ 61, YYAT_SHIFT, 130 },
 		{ 182, YYAT_SHIFT, 243 },
-		{ 225, YYAT_SHIFT, 159 },
-		{ 22, YYAT_SHIFT, 33 },
-		{ 225, YYAT_SHIFT, 160 },
-		{ 125, YYAT_SHIFT, 121 },
+		{ 217, YYAT_SHIFT, 134 },
+		{ 23, YYAT_SHIFT, 33 },
+		{ 217, YYAT_SHIFT, 135 },
+		{ 124, YYAT_SHIFT, 121 },
 		{ 178, YYAT_SHIFT, 239 },
-		{ 42, YYAT_SHIFT, 109 },
-		{ 105, YYAT_SHIFT, 183 },
-		{ 40, YYAT_SHIFT, 42 },
-		{ 26, YYAT_SHIFT, 42 },
+		{ 42, YYAT_SHIFT, 41 },
 		{ 105, YYAT_SHIFT, 184 },
-		{ 224, YYAT_SHIFT, 159 },
+		{ 41, YYAT_SHIFT, 109 },
+		{ 25, YYAT_SHIFT, 41 },
+		{ 105, YYAT_SHIFT, 185 },
+		{ 216, YYAT_SHIFT, 134 },
 		{ 177, YYAT_SHIFT, 178 },
-		{ 224, YYAT_SHIFT, 160 },
-		{ 223, YYAT_SHIFT, 156 },
+		{ 216, YYAT_SHIFT, 135 },
+		{ 210, YYAT_SHIFT, 136 },
 		{ 271, YYAT_SHIFT, 281 },
 		{ 103, YYAT_SHIFT, 178 },
-		{ 180, YYAT_SHIFT, 178 },
-		{ 208, YYAT_SHIFT, 254 },
-		{ 223, YYAT_SHIFT, 157 },
+		{ 181, YYAT_SHIFT, 178 },
+		{ 226, YYAT_SHIFT, 254 },
+		{ 210, YYAT_SHIFT, 137 },
 		{ 286, YYAT_SHIFT, 33 },
 		{ 268, YYAT_SHIFT, 280 },
-		{ 200, YYAT_SHIFT, 249 },
+		{ 199, YYAT_SHIFT, 249 },
 		{ 286, YYAT_SHIFT, 55 },
-		{ 223, YYAT_SHIFT, 158 },
-		{ 124, YYAT_SHIFT, 201 },
-		{ 216, YYAT_SHIFT, 161 },
-		{ 216, YYAT_SHIFT, 162 },
+		{ 210, YYAT_SHIFT, 138 },
+		{ 123, YYAT_SHIFT, 200 },
+		{ 207, YYAT_SHIFT, 141 },
+		{ 207, YYAT_SHIFT, 142 },
 		{ 259, YYAT_ERROR, 0 },
 		{ 43, YYAT_SHIFT, 1 },
 		{ 43, YYAT_SHIFT, 2 },
@@ -2969,28 +2994,28 @@ void YYPARSERNAME::yytables()
 		{ 10, YYAT_SHIFT, 6 },
 		{ 10, YYAT_SHIFT, 7 },
 		{ 10, YYAT_SHIFT, 8 },
-		{ 222, YYAT_SHIFT, 156 },
-		{ 71, YYAT_SHIFT, 156 },
-		{ 72, YYAT_SHIFT, 159 },
+		{ 209, YYAT_SHIFT, 136 },
+		{ 64, YYAT_SHIFT, 136 },
+		{ 63, YYAT_SHIFT, 134 },
 		{ 266, YYAT_SHIFT, 279 },
-		{ 72, YYAT_SHIFT, 160 },
-		{ 222, YYAT_SHIFT, 157 },
-		{ 71, YYAT_SHIFT, 157 },
-		{ 215, YYAT_SHIFT, 161 },
-		{ 215, YYAT_SHIFT, 162 },
+		{ 63, YYAT_SHIFT, 135 },
+		{ 209, YYAT_SHIFT, 137 },
+		{ 64, YYAT_SHIFT, 137 },
+		{ 206, YYAT_SHIFT, 141 },
+		{ 206, YYAT_SHIFT, 142 },
 		{ 265, YYAT_SHIFT, 278 },
-		{ 222, YYAT_SHIFT, 158 },
-		{ 71, YYAT_SHIFT, 158 },
-		{ 214, YYAT_SHIFT, 161 },
-		{ 214, YYAT_SHIFT, 162 },
-		{ 213, YYAT_SHIFT, 161 },
-		{ 213, YYAT_SHIFT, 162 },
-		{ 73, YYAT_SHIFT, 161 },
-		{ 73, YYAT_SHIFT, 162 },
+		{ 209, YYAT_SHIFT, 138 },
+		{ 64, YYAT_SHIFT, 138 },
+		{ 205, YYAT_SHIFT, 141 },
+		{ 205, YYAT_SHIFT, 142 },
+		{ 204, YYAT_SHIFT, 141 },
+		{ 204, YYAT_SHIFT, 142 },
+		{ 66, YYAT_SHIFT, 141 },
+		{ 66, YYAT_SHIFT, 142 },
 		{ 258, YYAT_SHIFT, 274 },
-		{ 14, YYAT_SHIFT, 28 },
-		{ 67, YYAT_SHIFT, 148 },
-		{ 67, YYAT_SHIFT, 149 },
+		{ 13, YYAT_SHIFT, 28 },
+		{ 65, YYAT_SHIFT, 139 },
+		{ 65, YYAT_SHIFT, 140 },
 		{ 257, YYAT_ERROR, 0 },
 		{ 251, YYAT_SHIFT, 54 },
 		{ 240, YYAT_SHIFT, 263 },
@@ -3001,46 +3026,46 @@ void YYPARSERNAME::yytables()
 		{ 230, YYAT_SHIFT, 257 },
 		{ 229, YYAT_SHIFT, 256 },
 		{ 228, YYAT_SHIFT, 255 },
-		{ 227, YYAT_SHIFT, 154 },
-		{ 218, YYAT_SHIFT, 164 },
-		{ 217, YYAT_SHIFT, 163 },
-		{ 96, YYAT_SHIFT, 1 },
-		{ 96, YYAT_SHIFT, 2 },
-		{ 96, YYAT_SHIFT, 3 },
-		{ 96, YYAT_SHIFT, 4 },
-		{ 96, YYAT_SHIFT, 5 },
-		{ 96, YYAT_SHIFT, 6 },
-		{ 96, YYAT_SHIFT, 7 },
-		{ 96, YYAT_SHIFT, 8 },
-		{ 210, YYAT_SHIFT, 155 },
+		{ 221, YYAT_SHIFT, 145 },
+		{ 220, YYAT_SHIFT, 144 },
+		{ 218, YYAT_SHIFT, 133 },
+		{ 94, YYAT_SHIFT, 1 },
+		{ 94, YYAT_SHIFT, 2 },
+		{ 94, YYAT_SHIFT, 3 },
+		{ 94, YYAT_SHIFT, 4 },
+		{ 94, YYAT_SHIFT, 5 },
+		{ 94, YYAT_SHIFT, 6 },
+		{ 94, YYAT_SHIFT, 7 },
+		{ 94, YYAT_SHIFT, 8 },
+		{ 208, YYAT_SHIFT, 146 },
 		{ 198, YYAT_SHIFT, 248 },
-		{ 190, YYAT_SHIFT, 147 },
-		{ 185, YYAT_ERROR, 0 },
-		{ 184, YYAT_SHIFT, 244 },
+		{ 189, YYAT_SHIFT, 143 },
+		{ 186, YYAT_ERROR, 0 },
+		{ 185, YYAT_SHIFT, 244 },
 		{ 167, YYAT_SHIFT, 230 },
-		{ 130, YYAT_SHIFT, 207 },
-		{ 129, YYAT_SHIFT, 204 },
+		{ 148, YYAT_SHIFT, 225 },
+		{ 147, YYAT_SHIFT, 222 },
 		{ 120, YYAT_SHIFT, 197 },
 		{ 119, YYAT_SHIFT, 196 },
 		{ 118, YYAT_SHIFT, 195 },
 		{ 113, YYAT_SHIFT, 192 },
 		{ 110, YYAT_SHIFT, 188 },
 		{ 108, YYAT_SHIFT, 187 },
-		{ 107, YYAT_SHIFT, 186 },
-		{ 106, YYAT_SHIFT, 185 },
+		{ 106, YYAT_SHIFT, 186 },
+		{ 104, YYAT_SHIFT, 183 },
 		{ 97, YYAT_SHIFT, 32 },
-		{ 86, YYAT_SHIFT, 174 },
+		{ 95, YYAT_SHIFT, 176 },
 		{ 85, YYAT_SHIFT, 171 },
 		{ 84, YYAT_SHIFT, 170 },
 		{ 83, YYAT_SHIFT, 169 },
 		{ 82, YYAT_SHIFT, 168 },
 		{ 80, YYAT_SHIFT, 166 },
 		{ 79, YYAT_SHIFT, 165 },
-		{ 75, YYAT_SHIFT, 164 },
-		{ 74, YYAT_SHIFT, 163 },
-		{ 70, YYAT_SHIFT, 155 },
-		{ 69, YYAT_SHIFT, 154 },
-		{ 66, YYAT_SHIFT, 147 },
+		{ 70, YYAT_SHIFT, 146 },
+		{ 69, YYAT_SHIFT, 145 },
+		{ 68, YYAT_SHIFT, 144 },
+		{ 67, YYAT_SHIFT, 143 },
+		{ 62, YYAT_SHIFT, 133 },
 		{ 54, YYAT_ERROR, 0 },
 		{ 46, YYAT_SHIFT, 116 },
 		{ 38, YYAT_ERROR, 0 },
@@ -3048,43 +3073,43 @@ void YYPARSERNAME::yytables()
 		{ 33, YYAT_SHIFT, 78 },
 		{ 30, YYAT_SHIFT, 48 },
 		{ 28, YYAT_SHIFT, 47 },
-		{ 25, YYAT_ERROR, 0 },
+		{ 26, YYAT_ERROR, 0 },
 		{ 20, YYAT_SHIFT, 20 },
-		{ 9, YYAT_ACCEPT, 0 },
+		{ 17, YYAT_ACCEPT, 0 },
 		{ -1, YYAT_ERROR, 0 },
 		{ -1, YYAT_ERROR, 0 },
 		{ -1, YYAT_ERROR, 0 },
 		{ -1, YYAT_ERROR, 0 },
 		{ -1, YYAT_ERROR, 0 },
 		{ -1, YYAT_ERROR, 0 },
-		{ 64, YYAT_SHIFT, 135 },
-		{ 64, YYAT_SHIFT, 136 },
-		{ 64, YYAT_SHIFT, 137 },
-		{ 64, YYAT_SHIFT, 138 },
-		{ 64, YYAT_SHIFT, 139 },
-		{ 64, YYAT_SHIFT, 140 },
-		{ 64, YYAT_SHIFT, 141 },
-		{ 64, YYAT_SHIFT, 142 },
-		{ 64, YYAT_SHIFT, 143 },
-		{ 64, YYAT_SHIFT, 144 },
+		{ 76, YYAT_SHIFT, 154 },
+		{ 76, YYAT_SHIFT, 155 },
+		{ 76, YYAT_SHIFT, 156 },
+		{ 76, YYAT_SHIFT, 157 },
+		{ 76, YYAT_SHIFT, 158 },
+		{ 76, YYAT_SHIFT, 159 },
+		{ 76, YYAT_SHIFT, 160 },
+		{ 76, YYAT_SHIFT, 161 },
+		{ 76, YYAT_SHIFT, 162 },
+		{ 76, YYAT_SHIFT, 163 },
 		{ 193, YYAT_SHIFT, 21 },
-		{ 212, YYAT_SHIFT, 152 },
-		{ 212, YYAT_SHIFT, 153 },
+		{ 215, YYAT_SHIFT, 131 },
+		{ 215, YYAT_SHIFT, 132 },
 		{ 286, YYAT_SHIFT, 56 },
 		{ 286, YYAT_SHIFT, 57 },
 		{ 286, YYAT_SHIFT, 58 },
 		{ 286, YYAT_SHIFT, 59 },
 		{ 286, YYAT_SHIFT, 60 },
-		{ 22, YYAT_SHIFT, 1 },
-		{ 22, YYAT_SHIFT, 2 },
-		{ 22, YYAT_SHIFT, 3 },
-		{ 22, YYAT_SHIFT, 4 },
-		{ 22, YYAT_SHIFT, 5 },
-		{ 22, YYAT_SHIFT, 6 },
-		{ 22, YYAT_SHIFT, 7 },
-		{ 22, YYAT_SHIFT, 8 },
-		{ 62, YYAT_SHIFT, 132 },
-		{ 62, YYAT_SHIFT, 133 },
+		{ 23, YYAT_SHIFT, 1 },
+		{ 23, YYAT_SHIFT, 2 },
+		{ 23, YYAT_SHIFT, 3 },
+		{ 23, YYAT_SHIFT, 4 },
+		{ 23, YYAT_SHIFT, 5 },
+		{ 23, YYAT_SHIFT, 6 },
+		{ 23, YYAT_SHIFT, 7 },
+		{ 23, YYAT_SHIFT, 8 },
+		{ 72, YYAT_SHIFT, 150 },
+		{ 72, YYAT_SHIFT, 151 },
 		{ -1, YYAT_ERROR, 0 },
 		{ 242, YYAT_SHIFT, 1 },
 		{ 242, YYAT_SHIFT, 2 },
@@ -3095,12 +3120,12 @@ void YYPARSERNAME::yytables()
 		{ 242, YYAT_SHIFT, 7 },
 		{ 242, YYAT_SHIFT, 8 },
 		{ 177, YYAT_SHIFT, 21 },
-		{ 211, YYAT_SHIFT, 152 },
-		{ 211, YYAT_SHIFT, 153 },
+		{ 214, YYAT_SHIFT, 131 },
+		{ 214, YYAT_SHIFT, 132 },
 		{ -1, YYAT_ERROR, 0 },
 		{ 103, YYAT_SHIFT, 21 },
-		{ 180, YYAT_SHIFT, 21 },
-		{ 41, YYAT_SHIFT, 102 },
+		{ 181, YYAT_SHIFT, 21 },
+		{ 40, YYAT_SHIFT, 102 },
 		{ 286, YYAT_SHIFT, 79 },
 		{ -1, YYAT_ERROR, 0 },
 		{ 286, YYAT_SHIFT, 80 },
@@ -3117,13 +3142,13 @@ void YYPARSERNAME::yytables()
 		{ 259, YYAT_ERROR, 0 },
 		{ 259, YYAT_ERROR, 0 },
 		{ 259, YYAT_ERROR, 0 },
-		{ 68, YYAT_SHIFT, 152 },
-		{ 68, YYAT_SHIFT, 153 }
+		{ 61, YYAT_SHIFT, 131 },
+		{ 61, YYAT_SHIFT, 132 }
 	};
 	yytokenaction = tokenaction;
 
 	static const yystateaction_t YYNEARFAR YYBASED_CODE stateaction[] = {
-		{ 0, 0, YYAT_DEFAULT, 185 },
+		{ 0, 0, YYAT_DEFAULT, 186 },
 		{ 0, 0, YYAT_REDUCE, 80 },
 		{ 0, 0, YYAT_REDUCE, 75 },
 		{ 0, 0, YYAT_REDUCE, 76 },
@@ -3132,74 +3157,74 @@ void YYPARSERNAME::yytables()
 		{ 0, 0, YYAT_REDUCE, 78 },
 		{ 0, 0, YYAT_REDUCE, 84 },
 		{ 0, 0, YYAT_REDUCE, 85 },
-		{ 204, 1, YYAT_ERROR, 0 },
-		{ -165, 1, YYAT_REDUCE, 68 },
 		{ 0, 0, YYAT_REDUCE, 171 },
+		{ -165, 1, YYAT_REDUCE, 68 },
 		{ 0, 0, YYAT_DEFAULT, 38 },
 		{ 0, 0, YYAT_REDUCE, 79 },
 		{ -115, 1, YYAT_ERROR, 0 },
-		{ -173, 1, YYAT_REDUCE, 167 },
 		{ 0, 0, YYAT_REDUCE, 168 },
+		{ -173, 1, YYAT_REDUCE, 167 },
 		{ 0, 0, YYAT_REDUCE, 170 },
+		{ 204, 1, YYAT_ERROR, 0 },
 		{ 0, 0, YYAT_REDUCE, 69 },
 		{ 0, 0, YYAT_DEFAULT, 38 },
 		{ 161, 1, YYAT_REDUCE, 106 },
 		{ 0, 0, YYAT_REDUCE, 98 },
-		{ -51, 1, YYAT_REDUCE, 72 },
 		{ 0, 0, YYAT_REDUCE, 70 },
+		{ -51, 1, YYAT_REDUCE, 72 },
 		{ 2, 1, YYAT_ERROR, 0 },
-		{ 160, 1, YYAT_DEFAULT, 38 },
 		{ -12, 1, YYAT_REDUCE, 97 },
-		{ 0, 0, YYAT_DEFAULT, 185 },
+		{ 160, 1, YYAT_DEFAULT, 38 },
+		{ 0, 0, YYAT_DEFAULT, 186 },
 		{ 78, 1, YYAT_REDUCE, 83 },
 		{ 0, 0, YYAT_REDUCE, 169 },
 		{ 159, 1, YYAT_ERROR, 0 },
 		{ 0, 0, YYAT_REDUCE, 107 },
 		{ 0, 0, YYAT_DEFAULT, 251 },
-		{ 74, 1, YYAT_DEFAULT, 96 },
+		{ 74, 1, YYAT_DEFAULT, 94 },
 		{ 0, 0, YYAT_REDUCE, 174 },
 		{ 0, 0, YYAT_DEFAULT, 38 },
 		{ 0, 0, YYAT_REDUCE, 173 },
-		{ 75, 1, YYAT_DEFAULT, 185 },
+		{ 75, 1, YYAT_DEFAULT, 186 },
 		{ 139, 1, YYAT_DEFAULT, 193 },
 		{ 0, 0, YYAT_REDUCE, 67 },
-		{ -13, 1, YYAT_REDUCE, 96 },
 		{ -3, 1, YYAT_DEFAULT, 242 },
-		{ -17, 1, YYAT_DEFAULT, 257 },
+		{ -15, 1, YYAT_DEFAULT, 257 },
+		{ -15, 1, YYAT_REDUCE, 96 },
 		{ -181, 1, YYAT_REDUCE, 90 },
 		{ 0, 0, YYAT_REDUCE, 86 },
 		{ 0, 0, YYAT_DEFAULT, 193 },
-		{ 71, 1, YYAT_DEFAULT, 185 },
-		{ 0, 0, YYAT_DEFAULT, 185 },
+		{ 71, 1, YYAT_DEFAULT, 186 },
+		{ 0, 0, YYAT_DEFAULT, 186 },
 		{ 0, 0, YYAT_REDUCE, 99 },
 		{ 0, 0, YYAT_REDUCE, 22 },
 		{ 0, 0, YYAT_REDUCE, 18 },
 		{ 0, 0, YYAT_DEFAULT, 257 },
 		{ 0, 0, YYAT_REDUCE, 19 },
 		{ 0, 0, YYAT_REDUCE, 20 },
-		{ 70, 1, YYAT_DEFAULT, 200 },
+		{ 70, 1, YYAT_DEFAULT, 199 },
 		{ 0, 0, YYAT_REDUCE, 21 },
 		{ 0, 0, YYAT_REDUCE, 1 },
 		{ 0, 0, YYAT_REDUCE, 2 },
 		{ 0, 0, YYAT_REDUCE, 3 },
 		{ 0, 0, YYAT_DEFAULT, 257 },
 		{ 0, 0, YYAT_DEFAULT, 257 },
-		{ 0, 0, YYAT_REDUCE, 5 },
-		{ -23, 1, YYAT_REDUCE, 14 },
-		{ 0, 0, YYAT_REDUCE, 130 },
-		{ -59, 1, YYAT_REDUCE, 23 },
-		{ 0, 0, YYAT_DEFAULT, 257 },
-		{ -75, 1, YYAT_REDUCE, 51 },
-		{ -123, 1, YYAT_REDUCE, 41 },
 		{ 7, 1, YYAT_REDUCE, 38 },
-		{ 99, 1, YYAT_REDUCE, 45 },
-		{ -76, 1, YYAT_REDUCE, 49 },
-		{ 87, 1, YYAT_REDUCE, 27 },
+		{ -74, 1, YYAT_REDUCE, 49 },
 		{ 82, 1, YYAT_REDUCE, 30 },
+		{ 87, 1, YYAT_REDUCE, 27 },
+		{ -123, 1, YYAT_REDUCE, 41 },
 		{ -123, 1, YYAT_REDUCE, 33 },
-		{ 153, 1, YYAT_REDUCE, 43 },
+		{ -76, 1, YYAT_REDUCE, 51 },
+		{ 154, 1, YYAT_REDUCE, 43 },
+		{ 97, 1, YYAT_REDUCE, 45 },
 		{ 66, 1, YYAT_REDUCE, 47 },
 		{ 0, 0, YYAT_REDUCE, 73 },
+		{ -23, 1, YYAT_REDUCE, 14 },
+		{ 0, 0, YYAT_REDUCE, 5 },
+		{ 0, 0, YYAT_REDUCE, 130 },
+		{ 0, 0, YYAT_DEFAULT, 257 },
+		{ -59, 1, YYAT_REDUCE, 23 },
 		{ 0, 0, YYAT_REDUCE, 153 },
 		{ 0, 0, YYAT_REDUCE, 147 },
 		{ 149, 1, YYAT_ERROR, 0 },
@@ -3209,17 +3234,17 @@ void YYPARSERNAME::yytables()
 		{ 127, 1, YYAT_ERROR, 0 },
 		{ 126, 1, YYAT_ERROR, 0 },
 		{ 125, 1, YYAT_DEFAULT, 257 },
-		{ 124, 1, YYAT_DEFAULT, 172 },
-		{ 0, 0, YYAT_REDUCE, 64 },
 		{ 0, 0, YYAT_REDUCE, 151 },
-		{ 0, 0, YYAT_REDUCE, 142 },
 		{ 0, 0, YYAT_REDUCE, 143 },
 		{ 0, 0, YYAT_REDUCE, 144 },
 		{ 0, 0, YYAT_REDUCE, 145 },
 		{ 0, 0, YYAT_REDUCE, 146 },
 		{ 0, 0, YYAT_REDUCE, 152 },
+		{ 0, 0, YYAT_REDUCE, 142 },
 		{ 0, 0, YYAT_REDUCE, 149 },
 		{ -122, 1, YYAT_DEFAULT, 286 },
+		{ 124, 1, YYAT_DEFAULT, 172 },
+		{ 0, 0, YYAT_REDUCE, 64 },
 		{ 121, 1, YYAT_REDUCE, 72 },
 		{ 0, 0, YYAT_REDUCE, 175 },
 		{ 0, 0, YYAT_REDUCE, 172 },
@@ -3227,36 +3252,55 @@ void YYPARSERNAME::yytables()
 		{ 0, 0, YYAT_REDUCE, 105 },
 		{ 0, 0, YYAT_REDUCE, 114 },
 		{ -5, 1, YYAT_REDUCE, 113 },
-		{ 0, 0, YYAT_REDUCE, 109 },
+		{ 140, 1, YYAT_ERROR, 0 },
 		{ 36, 1, YYAT_ERROR, 0 },
-		{ 137, 1, YYAT_REDUCE, 108 },
-		{ 139, 1, YYAT_ERROR, 0 },
+		{ 136, 1, YYAT_REDUCE, 108 },
+		{ 0, 0, YYAT_REDUCE, 109 },
 		{ 86, 1, YYAT_REDUCE, 19 },
 		{ 0, 0, YYAT_REDUCE, 102 },
 		{ 85, 1, YYAT_ERROR, 0 },
 		{ 0, 0, YYAT_REDUCE, 89 },
 		{ 0, 0, YYAT_DEFAULT, 257 },
 		{ 119, 1, YYAT_REDUCE, 93 },
-		{ -2, 1, YYAT_ERROR, 0 },
 		{ 0, 0, YYAT_REDUCE, 91 },
+		{ -2, 1, YYAT_ERROR, 0 },
 		{ 0, 0, YYAT_REDUCE, 82 },
 		{ 0, 0, YYAT_REDUCE, 87 },
-		{ 51, 1, YYAT_DEFAULT, 185 },
+		{ 51, 1, YYAT_DEFAULT, 186 },
 		{ 134, 1, YYAT_DEFAULT, 277 },
 		{ -83, 1, YYAT_ERROR, 0 },
 		{ 0, 0, YYAT_DEFAULT, 257 },
 		{ 0, 0, YYAT_REDUCE, 133 },
-		{ 0, 0, YYAT_DEFAULT, 251 },
 		{ -30, 1, YYAT_ERROR, 0 },
 		{ -17, 1, YYAT_ERROR, 0 },
 		{ 0, 0, YYAT_REDUCE, 138 },
+		{ 0, 0, YYAT_DEFAULT, 251 },
 		{ 0, 0, YYAT_REDUCE, 15 },
 		{ 0, 0, YYAT_REDUCE, 16 },
+		{ 0, 0, YYAT_DEFAULT, 257 },
+		{ 0, 0, YYAT_DEFAULT, 257 },
+		{ 0, 0, YYAT_DEFAULT, 257 },
+		{ 0, 0, YYAT_DEFAULT, 257 },
+		{ 0, 0, YYAT_DEFAULT, 257 },
+		{ 0, 0, YYAT_DEFAULT, 257 },
+		{ 0, 0, YYAT_DEFAULT, 257 },
+		{ 0, 0, YYAT_DEFAULT, 257 },
+		{ 0, 0, YYAT_DEFAULT, 257 },
+		{ 0, 0, YYAT_DEFAULT, 257 },
+		{ 0, 0, YYAT_DEFAULT, 257 },
+		{ 0, 0, YYAT_DEFAULT, 257 },
+		{ 0, 0, YYAT_DEFAULT, 257 },
+		{ 0, 0, YYAT_DEFAULT, 257 },
+		{ 0, 0, YYAT_DEFAULT, 257 },
+		{ 0, 0, YYAT_DEFAULT, 257 },
+		{ 0, 0, YYAT_DEFAULT, 257 },
+		{ 0, 0, YYAT_DEFAULT, 257 },
 		{ 132, 1, YYAT_DEFAULT, 259 },
 		{ -85, 1, YYAT_ERROR, 0 },
 		{ 0, 0, YYAT_DEFAULT, 257 },
 		{ 0, 0, YYAT_REDUCE, 10 },
 		{ 0, 0, YYAT_REDUCE, 11 },
+		{ 0, 0, YYAT_REDUCE, 17 },
 		{ 0, 0, YYAT_REDUCE, 53 },
 		{ 0, 0, YYAT_REDUCE, 54 },
 		{ 0, 0, YYAT_REDUCE, 55 },
@@ -3269,25 +3313,6 @@ void YYPARSERNAME::yytables()
 		{ 0, 0, YYAT_REDUCE, 62 },
 		{ 0, 0, YYAT_REDUCE, 63 },
 		{ 0, 0, YYAT_DEFAULT, 257 },
-		{ 0, 0, YYAT_REDUCE, 17 },
-		{ 0, 0, YYAT_DEFAULT, 257 },
-		{ 0, 0, YYAT_DEFAULT, 257 },
-		{ 0, 0, YYAT_DEFAULT, 257 },
-		{ 0, 0, YYAT_DEFAULT, 257 },
-		{ 0, 0, YYAT_DEFAULT, 257 },
-		{ 0, 0, YYAT_DEFAULT, 257 },
-		{ 0, 0, YYAT_DEFAULT, 257 },
-		{ 0, 0, YYAT_DEFAULT, 257 },
-		{ 0, 0, YYAT_DEFAULT, 257 },
-		{ 0, 0, YYAT_DEFAULT, 257 },
-		{ 0, 0, YYAT_DEFAULT, 257 },
-		{ 0, 0, YYAT_DEFAULT, 257 },
-		{ 0, 0, YYAT_DEFAULT, 257 },
-		{ 0, 0, YYAT_DEFAULT, 257 },
-		{ 0, 0, YYAT_DEFAULT, 257 },
-		{ 0, 0, YYAT_DEFAULT, 257 },
-		{ 0, 0, YYAT_DEFAULT, 257 },
-		{ 0, 0, YYAT_DEFAULT, 257 },
 		{ 0, 0, YYAT_DEFAULT, 257 },
 		{ 0, 0, YYAT_DEFAULT, 257 },
 		{ -119, 1, YYAT_ERROR, 0 },
@@ -3296,25 +3321,25 @@ void YYPARSERNAME::yytables()
 		{ 0, 0, YYAT_REDUCE, 164 },
 		{ 0, 0, YYAT_REDUCE, 165 },
 		{ -3, 1, YYAT_ERROR, 0 },
-		{ 0, 0, YYAT_DEFAULT, 257 },
-		{ 0, 0, YYAT_REDUCE, 154 },
 		{ 0, 0, YYAT_REDUCE, 148 },
 		{ 0, 0, YYAT_REDUCE, 150 },
+		{ 0, 0, YYAT_DEFAULT, 257 },
+		{ 0, 0, YYAT_REDUCE, 154 },
 		{ -9, 1, YYAT_DEFAULT, 242 },
 		{ -18, 1, YYAT_DEFAULT, 257 },
 		{ 0, 0, YYAT_REDUCE, 111 },
-		{ -4, 1, YYAT_REDUCE, 116 },
 		{ 0, 0, YYAT_REDUCE, 112 },
+		{ -4, 1, YYAT_REDUCE, 116 },
 		{ -21, 1, YYAT_REDUCE, 117 },
+		{ 0, 0, YYAT_REDUCE, 103 },
 		{ 0, 0, YYAT_REDUCE, 104 },
 		{ -87, 1, YYAT_ERROR, 0 },
 		{ 128, 1, YYAT_DEFAULT, 242 },
-		{ 0, 0, YYAT_REDUCE, 103 },
 		{ 0, 0, YYAT_REDUCE, 101 },
 		{ 0, 0, YYAT_REDUCE, 100 },
-		{ 0, 0, YYAT_REDUCE, 23 },
 		{ -101, 1, YYAT_REDUCE, 66 },
 		{ 0, 0, YYAT_REDUCE, 94 },
+		{ 0, 0, YYAT_REDUCE, 23 },
 		{ 0, 0, YYAT_DEFAULT, 257 },
 		{ -36, 1, YYAT_ERROR, 0 },
 		{ 0, 0, YYAT_REDUCE, 88 },
@@ -3322,35 +3347,35 @@ void YYPARSERNAME::yytables()
 		{ 0, 0, YYAT_REDUCE, 4 },
 		{ 0, 0, YYAT_REDUCE, 141 },
 		{ 74, 1, YYAT_ERROR, 0 },
-		{ 0, 0, YYAT_REDUCE, 134 },
 		{ -33, 1, YYAT_DEFAULT, 251 },
 		{ 0, 0, YYAT_REDUCE, 131 },
 		{ 0, 0, YYAT_REDUCE, 137 },
 		{ 0, 0, YYAT_REDUCE, 139 },
+		{ 0, 0, YYAT_REDUCE, 134 },
+		{ -125, 1, YYAT_REDUCE, 34 },
+		{ -127, 1, YYAT_REDUCE, 35 },
+		{ -132, 1, YYAT_REDUCE, 36 },
+		{ -166, 1, YYAT_REDUCE, 37 },
+		{ 42, 1, YYAT_REDUCE, 48 },
+		{ 86, 1, YYAT_REDUCE, 28 },
+		{ 47, 1, YYAT_REDUCE, 29 },
+		{ 0, 0, YYAT_REDUCE, 26 },
+		{ 0, 0, YYAT_REDUCE, 24 },
+		{ 0, 0, YYAT_REDUCE, 25 },
+		{ -15, 1, YYAT_REDUCE, 39 },
+		{ -42, 1, YYAT_REDUCE, 40 },
+		{ 38, 1, YYAT_REDUCE, 31 },
+		{ 28, 1, YYAT_REDUCE, 32 },
+		{ -111, 1, YYAT_REDUCE, 50 },
+		{ -202, 1, YYAT_REDUCE, 42 },
+		{ 118, 1, YYAT_REDUCE, 44 },
+		{ 61, 1, YYAT_REDUCE, 46 },
 		{ 0, 0, YYAT_REDUCE, 7 },
 		{ 19, 1, YYAT_ERROR, 0 },
 		{ 0, 0, YYAT_REDUCE, 12 },
 		{ 0, 0, YYAT_REDUCE, 9 },
 		{ -5, 1, YYAT_ERROR, 0 },
 		{ 0, 0, YYAT_REDUCE, 52 },
-		{ -102, 1, YYAT_REDUCE, 50 },
-		{ -15, 1, YYAT_REDUCE, 39 },
-		{ -42, 1, YYAT_REDUCE, 40 },
-		{ -125, 1, YYAT_REDUCE, 34 },
-		{ -127, 1, YYAT_REDUCE, 35 },
-		{ -132, 1, YYAT_REDUCE, 36 },
-		{ -166, 1, YYAT_REDUCE, 37 },
-		{ 119, 1, YYAT_REDUCE, 44 },
-		{ 32, 1, YYAT_REDUCE, 48 },
-		{ 0, 0, YYAT_REDUCE, 26 },
-		{ 0, 0, YYAT_REDUCE, 24 },
-		{ 0, 0, YYAT_REDUCE, 25 },
-		{ 86, 1, YYAT_REDUCE, 28 },
-		{ 47, 1, YYAT_REDUCE, 29 },
-		{ 38, 1, YYAT_REDUCE, 31 },
-		{ 28, 1, YYAT_REDUCE, 32 },
-		{ -202, 1, YYAT_REDUCE, 42 },
-		{ 61, 1, YYAT_REDUCE, 46 },
 		{ 113, 1, YYAT_DEFAULT, 277 },
 		{ 112, 1, YYAT_DEFAULT, 277 },
 		{ 112, 1, YYAT_ERROR, 0 },
@@ -3383,8 +3408,8 @@ void YYPARSERNAME::yytables()
 		{ 104, 1, YYAT_DEFAULT, 259 },
 		{ 100, 1, YYAT_DEFAULT, 259 },
 		{ -25, 1, YYAT_DEFAULT, 286 },
-		{ 0, 0, YYAT_REDUCE, 119 },
 		{ 0, 0, YYAT_REDUCE, 127 },
+		{ 0, 0, YYAT_REDUCE, 119 },
 		{ 0, 0, YYAT_REDUCE, 124 },
 		{ 0, 0, YYAT_REDUCE, 121 },
 		{ 0, 0, YYAT_REDUCE, 128 },
@@ -3420,150 +3445,150 @@ void YYPARSERNAME::yytables()
 	yynontermgoto_size = 186;
 
 	static const yynontermgoto_t YYNEARFAR YYBASED_CODE nontermgoto[] = {
-		{ 286, 61 },
-		{ 286, 62 },
-		{ 259, 277 },
-		{ 286, 64 },
-		{ 286, 65 },
-		{ 286, 71 },
-		{ 286, 72 },
 		{ 286, 73 },
-		{ 286, 68 },
-		{ 286, 67 },
-		{ 286, 74 },
-		{ 286, 69 },
+		{ 286, 72 },
+		{ 259, 277 },
+		{ 286, 76 },
 		{ 286, 75 },
-		{ 286, 70 },
+		{ 286, 64 },
+		{ 286, 63 },
 		{ 286, 66 },
-		{ 286, 87 },
-		{ 232, 86 },
-		{ 286, 86 },
-		{ 96, 88 },
-		{ 96, 35 },
-		{ 129, 205 },
+		{ 286, 61 },
+		{ 286, 65 },
+		{ 286, 68 },
+		{ 286, 69 },
+		{ 286, 70 },
+		{ 286, 62 },
+		{ 286, 67 },
+		{ 286, 96 },
+		{ 232, 95 },
+		{ 286, 95 },
+		{ 94, 86 },
+		{ 94, 35 },
+		{ 147, 223 },
 		{ 284, 289 },
-		{ 96, 10 },
-		{ 96, 13 },
-		{ 96, 14 },
+		{ 94, 10 },
+		{ 94, 12 },
+		{ 94, 13 },
+		{ 15, 9 },
 		{ 15, 11 },
-		{ 15, 12 },
+		{ 192, 191 },
+		{ 23, 34 },
+		{ 40, 104 },
+		{ 259, -1 },
+		{ 259, -1 },
+		{ 40, 105 },
+		{ 147, 224 },
+		{ 259, -1 },
+		{ 259, -1 },
+		{ 259, -1 },
+		{ 259, -1 },
 		{ 192, 189 },
-		{ 22, 34 },
-		{ 41, 107 },
-		{ 259, -1 },
-		{ 259, -1 },
-		{ 41, 105 },
-		{ 129, 206 },
-		{ 259, -1 },
-		{ 259, -1 },
-		{ 259, -1 },
-		{ 259, -1 },
-		{ 192, 190 },
 		{ 192, -1 },
 		{ 37, 98 },
 		{ 37, 35 },
 		{ 192, 246 },
-		{ 251, 63 },
-		{ 96, 94 },
+		{ 251, 74 },
+		{ 94, 91 },
 		{ 286, 290 },
-		{ 286, 89 },
-		{ 96, 176 },
-		{ 232, 259 },
-		{ 286, 90 },
-		{ 286, 91 },
 		{ 286, 92 },
-		{ 286, 93 },
+		{ 94, 174 },
+		{ 232, 259 },
+		{ 286, 87 },
+		{ 286, 88 },
+		{ 286, 89 },
+		{ 286, 90 },
 		{ 168, 231 },
 		{ 168, 35 },
-		{ 22, 36 },
+		{ 23, 36 },
 		{ 281, 287 },
 		{ 168, 10 },
+		{ 168, 12 },
 		{ 168, 13 },
-		{ 168, 14 },
 		{ 242, 103 },
 		{ 15, 29 },
-		{ 15, 17 },
+		{ 15, 16 },
 		{ 242, 10 },
+		{ 242, 12 },
 		{ 242, 13 },
-		{ 242, 14 },
-		{ 22, 37 },
+		{ 23, 37 },
 		{ 37, 99 },
 		{ 251, 269 },
 		{ 10, 18 },
 		{ 177, 30 },
-		{ 177, 26 },
-		{ 177, 180 },
-		{ 177, 237 },
+		{ 177, 25 },
+		{ 177, 181 },
+		{ 177, 236 },
 		{ 242, 265 },
 		{ 242, 106 },
-		{ 242, 104 },
-		{ 177, 236 },
+		{ 242, 107 },
+		{ 177, 237 },
 		{ 177, 182 },
-		{ 164, 227 },
-		{ 164, -1 },
-		{ 164, -1 },
-		{ 164, -1 },
+		{ 146, 221 },
+		{ 146, -1 },
+		{ 146, -1 },
+		{ 146, -1 },
 		{ 168, 232 },
 		{ 118, -1 },
 		{ 10, -1 },
-		{ 164, -1 },
+		{ 146, -1 },
 		{ 118, 43 },
 		{ 103, 179 },
 		{ 38, 100 },
-		{ 103, 180 },
+		{ 103, 181 },
 		{ 118, 117 },
 		{ 118, 45 },
-		{ 163, 226 },
-		{ 163, -1 },
-		{ 103, 181 },
+		{ 145, 220 },
+		{ 145, -1 },
+		{ 103, 180 },
 		{ 103, 182 },
-		{ 200, 250 },
+		{ 199, 250 },
 		{ 38, 97 },
-		{ 200, 251 },
-		{ 200, 125 },
-		{ 200, 126 },
+		{ 199, 251 },
+		{ 199, 124 },
+		{ 199, 125 },
 		{ 193, 247 },
 		{ 193, 113 },
-		{ 193, 26 },
 		{ 193, 25 },
-		{ 185, -1 },
-		{ 185, -1 },
-		{ 185, 245 },
-		{ 162, 225 },
-		{ 162, -1 },
-		{ 162, -1 },
+		{ 193, 26 },
+		{ 186, -1 },
+		{ 186, -1 },
+		{ 186, 245 },
+		{ 142, 217 },
+		{ 142, -1 },
+		{ 142, -1 },
 		{ 54, 122 },
-		{ 54, 124 },
 		{ 54, 123 },
-		{ 0, 9 },
+		{ 54, 126 },
+		{ 0, 17 },
 		{ 0, 15 },
-		{ 0, 16 },
+		{ 0, 14 },
 		{ 253, 270 },
-		{ 158, 221 },
+		{ 138, 213 },
 		{ 253, -1 },
-		{ 158, -1 },
-		{ 160, 223 },
-		{ 160, -1 },
-		{ 155, 69 },
-		{ 155, 218 },
-		{ 154, 217 },
-		{ 154, -1 },
-		{ 153, 72 },
-		{ 153, 216 },
-		{ 149, 212 },
-		{ 149, -1 },
-		{ 147, 75 },
-		{ 147, 210 },
+		{ 138, -1 },
+		{ 144, 219 },
+		{ 144, -1 },
+		{ 143, 70 },
+		{ 143, 218 },
+		{ 140, 215 },
+		{ 140, -1 },
+		{ 135, 210 },
+		{ 135, -1 },
+		{ 133, 69 },
+		{ 133, 208 },
+		{ 132, 63 },
+		{ 132, 207 },
 		{ 47, 118 },
 		{ 47, 44 },
-		{ 45, 114 },
 		{ 45, 115 },
+		{ 45, 114 },
 		{ 43, -1 },
 		{ 43, 111 },
 		{ 35, 24 },
-		{ 35, 23 },
-		{ 33, 96 },
-		{ 33, 95 },
+		{ 35, 22 },
+		{ 33, 94 },
+		{ 33, 93 },
 		{ 19, -1 },
 		{ 19, 30 },
 		{ 276, 285 },
@@ -3574,38 +3599,38 @@ void YYPARSERNAME::yytables()
 		{ 255, 271 },
 		{ 243, 268 },
 		{ 231, 258 },
-		{ 180, 241 },
+		{ 181, 241 },
 		{ 178, 240 },
-		{ 173, 234 },
+		{ 175, 234 },
 		{ 166, 229 },
 		{ 165, 228 },
-		{ 161, 224 },
-		{ 159, 222 },
-		{ 157, 220 },
-		{ 156, 219 },
-		{ 152, 215 },
-		{ 151, 214 },
-		{ 150, 213 },
-		{ 148, 211 },
-		{ 145, 209 },
-		{ 131, 208 },
-		{ 125, 203 },
-		{ 123, 199 },
+		{ 164, 227 },
+		{ 149, 226 },
+		{ 141, 216 },
+		{ 139, 214 },
+		{ 137, 212 },
+		{ 136, 211 },
+		{ 134, 209 },
+		{ 131, 206 },
+		{ 130, 205 },
+		{ 129, 204 },
+		{ 126, 203 },
+		{ 124, 202 },
 		{ 121, 198 },
-		{ 112, 191 },
+		{ 112, 190 },
 		{ 85, 172 },
 		{ 81, 167 },
-		{ 65, 146 },
-		{ 64, 145 },
+		{ 76, 164 },
+		{ 75, 152 },
 		{ 60, 128 },
 		{ 59, 127 },
 		{ 51, 119 },
-		{ 42, 110 },
-		{ 32, 76 },
+		{ 41, 110 },
+		{ 32, 71 },
 		{ 27, 46 },
-		{ 25, 40 },
+		{ 26, 42 },
 		{ 20, 31 },
-		{ 12, 22 }
+		{ 11, 23 }
 	};
 	yynontermgoto = nontermgoto;
 
@@ -3620,9 +3645,9 @@ void YYPARSERNAME::yytables()
 		{ 0, -1 },
 		{ 0, -1 },
 		{ 0, -1 },
-		{ 48, 185 },
-		{ 0, -1 },
+		{ 48, 186 },
 		{ 153, 35 },
+		{ 0, -1 },
 		{ 0, -1 },
 		{ 0, -1 },
 		{ 5, 10 },
@@ -3632,27 +3657,27 @@ void YYPARSERNAME::yytables()
 		{ 113, 193 },
 		{ 150, -1 },
 		{ 0, -1 },
+		{ 0, -1 },
 		{ 8, 37 },
 		{ 0, -1 },
 		{ 0, -1 },
 		{ 150, -1 },
-		{ 0, -1 },
 		{ 155, 47 },
 		{ 0, -1 },
 		{ 0, -1 },
 		{ 0, -1 },
 		{ 0, -1 },
 		{ 140, 251 },
-		{ 94, 96 },
+		{ 94, 94 },
 		{ 0, -1 },
 		{ 118, 38 },
 		{ 0, -1 },
 		{ 20, 10 },
 		{ 66, 19 },
 		{ 0, -1 },
-		{ 0, -1 },
 		{ -6, 242 },
 		{ 164, 253 },
+		{ 0, -1 },
 		{ 110, 118 },
 		{ 0, -1 },
 		{ 106, 193 },
@@ -3664,18 +3689,13 @@ void YYPARSERNAME::yytables()
 		{ 161, 259 },
 		{ 0, -1 },
 		{ 0, -1 },
-		{ 71, 200 },
+		{ 71, 199 },
 		{ 0, -1 },
 		{ 0, -1 },
 		{ 0, -1 },
 		{ 0, -1 },
-		{ 174, 158 },
-		{ 173, 158 },
-		{ 0, -1 },
-		{ 0, -1 },
-		{ 0, -1 },
-		{ 159, -1 },
-		{ 171, 158 },
+		{ 174, 138 },
+		{ 173, 138 },
 		{ 0, -1 },
 		{ 0, -1 },
 		{ 0, -1 },
@@ -3687,6 +3707,11 @@ void YYPARSERNAME::yytables()
 		{ 0, -1 },
 		{ 0, -1 },
 		{ 0, -1 },
+		{ 0, -1 },
+		{ 0, -1 },
+		{ 0, -1 },
+		{ 172, 138 },
+		{ 158, -1 },
 		{ 0, -1 },
 		{ 0, -1 },
 		{ 0, -1 },
@@ -3704,9 +3729,9 @@ void YYPARSERNAME::yytables()
 		{ 0, -1 },
 		{ 0, -1 },
 		{ 0, -1 },
-		{ 0, -1 },
-		{ 0, -1 },
 		{ -2, 286 },
+		{ 0, -1 },
+		{ 0, -1 },
 		{ 0, -1 },
 		{ 0, -1 },
 		{ 0, -1 },
@@ -3733,15 +3758,33 @@ void YYPARSERNAME::yytables()
 		{ 0, -1 },
 		{ 152, 192 },
 		{ 0, -1 },
-		{ 129, 251 },
 		{ 0, -1 },
-		{ 124, -1 },
+		{ 125, -1 },
+		{ 0, -1 },
+		{ 128, 251 },
 		{ 0, -1 },
 		{ 0, -1 },
-		{ 0, -1 },
+		{ 160, 132 },
+		{ 159, 132 },
+		{ 158, 132 },
+		{ 125, 142 },
+		{ 118, 146 },
+		{ 159, 135 },
+		{ 122, 142 },
+		{ 160, 138 },
+		{ 159, 138 },
+		{ 115, 135 },
+		{ 153, 140 },
+		{ 117, 144 },
+		{ 154, 142 },
+		{ 102, 140 },
+		{ 111, 133 },
+		{ 112, 145 },
+		{ 82, 146 },
+		{ 67, 192 },
 		{ 17, 253 },
 		{ 0, -1 },
-		{ 150, 259 },
+		{ 142, 259 },
 		{ 0, -1 },
 		{ 0, -1 },
 		{ 0, -1 },
@@ -3755,26 +3798,8 @@ void YYPARSERNAME::yytables()
 		{ 0, -1 },
 		{ 0, -1 },
 		{ 0, -1 },
-		{ 151, 253 },
 		{ 0, -1 },
-		{ 119, 155 },
-		{ 157, 149 },
-		{ 121, 163 },
-		{ 157, 153 },
-		{ 156, 153 },
-		{ 155, 153 },
-		{ 121, 162 },
-		{ 115, 164 },
-		{ 112, 164 },
-		{ 158, 158 },
-		{ 157, 158 },
-		{ 115, 160 },
-		{ 154, 160 },
-		{ 116, 162 },
-		{ 152, 162 },
-		{ 102, 149 },
-		{ 83, 154 },
-		{ 67, 192 },
+		{ 143, 253 },
 		{ 140, 259 },
 		{ 139, 259 },
 		{ 0, -1 },
@@ -3783,20 +3808,20 @@ void YYPARSERNAME::yytables()
 		{ 0, -1 },
 		{ 0, -1 },
 		{ 0, -1 },
+		{ 0, -1 },
+		{ 0, -1 },
 		{ 140, 253 },
-		{ 0, -1 },
-		{ 0, -1 },
 		{ 0, -1 },
 		{ 38, 242 },
 		{ 139, 253 },
 		{ 0, -1 },
-		{ 114, 25 },
+		{ 0, -1 },
+		{ 114, 26 },
 		{ 0, -1 },
 		{ 0, -1 },
 		{ 0, -1 },
 		{ 0, -1 },
 		{ 71, 242 },
-		{ 0, -1 },
 		{ 0, -1 },
 		{ 0, -1 },
 		{ 0, -1 },
@@ -3809,8 +3834,8 @@ void YYPARSERNAME::yytables()
 		{ 0, -1 },
 		{ 0, -1 },
 		{ 0, -1 },
-		{ 0, -1 },
 		{ 56, 251 },
+		{ 0, -1 },
 		{ 0, -1 },
 		{ 0, -1 },
 		{ 0, -1 },
@@ -3912,7 +3937,7 @@ void YYPARSERNAME::yytables()
 	yytokendestbaseptr = NULL;
 	yytokendestbase_size = 0;
 }
-#line 1116 ".\\myparser.y"
+#line 1141 ".\\myparser.y"
 
 #include <stdio.h>
 #include<fstream>
