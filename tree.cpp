@@ -1,5 +1,7 @@
 #include "tree.h"
 
+FuncEntry fentry;
+
 Node::Node()
 {
     for (int i = 0; i < 4; i++)
@@ -23,6 +25,15 @@ Node *check_type(char *id)
 {
     Node *ret = generate_ID_node();
     string name = id;
+    // 有限去临时符号表里找
+    auto mm_search = Temp_Table.find(name);
+    if (mm_search != Temp_Table.end())
+    {
+        VALUE_TYPE result = mm_search->second;
+        ret->v_type = result;
+        ret->name = id;
+        return ret;
+    }
     auto temp_search = ID_Table.find(name);
     if (temp_search != ID_Table.end())
     {
@@ -41,7 +52,7 @@ Node *check_type(char *id)
         }
         else if (type == "FUNC")
         {
-            auto search = Fuction_Table.find(name);
+            auto search = Function_Table.find(name);
             auto result = search->second;
             ret->name = result.name;
             ret->v_type = result.type;
@@ -69,8 +80,8 @@ void table_init()
     f1.type = None;
     f2.name = "scanf";
     f2.type = None;
-    Fuction_Table["printf"] = f1;
-    Fuction_Table["scanf"] = f2;
+    Function_Table["printf"] = f1;
+    Function_Table["scanf"] = f2;
 }
 Node *generate_expr_node()
 {
@@ -430,9 +441,9 @@ string generate_pre_code(Node *node, string op)
     }
     else if (op == "!")
     {
-        // 逻辑???
-        //和自己异或
+        // 逻辑
         ret += "\tnot eax\n";
+        ret += "\tand eax, 1\n";
     }
     else if (op == "++")
     {
@@ -667,6 +678,20 @@ string generate_if_code(Node *node1, Node *node2, Node *node3)
     return ret;
 }
 
+string generate_temp_define()
+{
+    string ret;
+    auto i = Temp_Table.begin();
+    for (; i != Temp_Table.end(); i++)
+    {
+        string name = i->first;
+        VALUE_TYPE entry = i->second;
+        ret += " " + name + ":dd";
+    }
+    ret += "\n";
+    // 打印输入缓冲
+    return ret;
+}
 string generate_var_define()
 {
     string ret = ".data\n";

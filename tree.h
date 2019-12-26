@@ -70,7 +70,7 @@ struct FuncEntry
 {
     string name;
     VALUE_TYPE type;
-    int arg_num;
+    int arg_nums;
     VALUE_TYPE arg_type[10];
 };
 struct PointerEntry{
@@ -80,12 +80,13 @@ struct PointerEntry{
     State state;// 状态
     int depth;// 指针的层数
 };
-
+extern FuncEntry fentry;
 // 符号表的填入： 变量声明语句
 extern unordered_map<string, string> ID_Table;
 extern unordered_map<string, VarEntry> Var_Table;
+extern unordered_map<string, VALUE_TYPE> Temp_Table;
 extern unordered_map<string, StructEntry> Struct_Table;
-extern unordered_map<string, FuncEntry> Fuction_Table;
+extern unordered_map<string, FuncEntry> Function_Table;
 extern unordered_map<string, PointerEntry> Pointer_Table;
 class Node
 {
@@ -109,7 +110,7 @@ public:
 public:
     Node();
 };
-
+string generate_temp_define();
 Node *generate_const_node();
 Node *generate_expr_node();
 Node *generate_stmt_node();

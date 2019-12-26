@@ -128,11 +128,11 @@ postfix_expression
 				}
 				//d
 				else if(format[i+1]=='d'){
-					$$->code += "\tinvoke crt_scanf, SADD('%d',13,10), ";
+					$$->code += "\tinvoke crt_scanf, SADD('%d',10,13), ";
 					$$->code += temp_table[temp->it] + "\n";
 				}
 				else if(format[i+1] == 'c'){
-					$$->code += "\tinvoke crt_scanf, SADD('%c',13,10), ";
+					$$->code += "\tinvoke crt_scanf, SADD('%c',0), ";
 					$$->code += temp_table[temp->it] + "\n";
 				}
 				temp = temp->sibing;
