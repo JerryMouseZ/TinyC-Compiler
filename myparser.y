@@ -140,7 +140,25 @@ postfix_expression
 			}
 		}
 		else{
-			;
+			// 带参函数的调用
+			$$->code += "\tinvoke "+$1->name;
+			Node * temp = $3;
+			while(temp != NULL){
+				if(temp->it == -1)
+					$$->code += ", " + temp->name;
+				else
+					$$->code += ", " + temp_table[temp->it];
+				temp = temp->sibing;
+			}
+			$$->code += "\n";
+			temp_top++;
+			if (temp_top > max_top)
+			{
+				max_top++;
+				temp_table.push_back("temp_" + to_string(max_top));
+			}
+			$$->code += "\tmov "+temp_table[temp_top] + ", eax\n";
+			$$->it = temp_top;
 		}
 	}
 	| postfix_expression '.' IDENTIFIER	{
@@ -474,8 +492,6 @@ exclusive_or_expression
 			$$->v_type = $1->v_type;
 		$$->code += generate_expr_code($1,$3,"^");
 		$$->it = temp_top;
-
-		
 	}
 	;
 
@@ -532,15 +548,6 @@ logical_or_expression
 assignment_expression
 	: logical_or_expression {$$ = $1;}
 	| unary_expression assignment_operator assignment_expression {
-		// 分两种情况，直接就是id或者是 *i= 或者是 &i = 
-		// 以及 a[i] = 
-		// 直接就是id
-		// if($1->name == ""){
-		// 	Node*temp = $1;
-		// 	while(temp->children[0] != NULL){
-		// 		temp = temp->children[0];
-		// 	}
-		// }
 		$$ = generate_expr_node();
 		$$->children[0] = $1;
 		$$->children[1] = $3;
@@ -596,14 +603,25 @@ declaration
 		$$ = generate_decl_node();
 		Node*temp = $2;
 		while(temp != NULL){
-			ID_Table[temp->name] = "VAR";
-			VarEntry entry;
-			entry.name = temp->name;
-			entry.type = $1->v_type;
-			entry.ivalue = temp->ivalue;
-			entry.fvalue = temp->fvalue;
-			entry.state = temp->state;
-			Var_Table[temp->name] = entry;
+			if(temp->p_depth ==0){
+				ID_Table[temp->name] = "VAR";
+				VarEntry entry;
+				entry.name = temp->name;
+				entry.type = $1->v_type;
+				entry.ivalue = temp->ivalue;
+				entry.fvalue = temp->fvalue;
+				entry.state = temp->state;
+				Var_Table[temp->name] = entry;
+			}
+			else{
+				ID_Table[temp->name] = "POINTER";
+				PointerEntry entry;
+				entry.name = temp->name;
+				entry.type = $1->v_type;
+				entry.value = (void*)temp->ivalue;
+				entry.state = temp->state;
+				Pointer_Table[temp->name] = entry;
+			}
 			// 需要额外初始化的代码加上
 			$$->code += temp->code;
 			temp = temp->sibing;
@@ -647,9 +665,9 @@ init_declarator
 			// 否则生成赋值语句的代码
 			$$->code += $3->code; // 先把计算结果的代码加上
 			if($3->v_type == Double)
-				$$->code += generate_double_code($1, $3,"-");
+				$$->code += generate_double_code($1, $3,"=");
 			else
-				$$->code += generate_expr_code($1, $3,"-");
+				$$->code += generate_expr_code($1, $3, "=");
 			$$->it = temp_top;
 			$$->state = Valid;
 		}
@@ -711,7 +729,8 @@ struct_declarator
 declarator
 	: pointer direct_declarator {
 		// declarator *a
-
+		$$->name = $2->name;
+		$$->nd_type = ID_t;
 	}
 	| direct_declarator {
 		// a
@@ -729,14 +748,22 @@ direct_declarator
 	| direct_declarator '[' assignment_expression ']'
 	| direct_declarator '[' '*' ']'
 	| direct_declarator '[' ']'
-	| direct_declarator '(' parameter_type_list ')'
+	| direct_declarator '(' parameter_type_list ')' {
+		// 带参函数的声明
+		$$ = $1;
+	}
 	| direct_declarator '(' identifier_list ')'
-	| direct_declarator '(' ')'
+	| direct_declarator '(' ')' {
+		// 无参函数的声明和调用
+	}
 	;
 
 pointer
-	: '*'
-	| '*' pointer
+	: '*' {$$ = generate_pointer_node();}
+	| '*' pointer {
+		$$ = $1;
+		$$->p_depth++;
+	}
 	;
 
 parameter_type_list
@@ -745,11 +772,22 @@ parameter_type_list
 
 parameter_list
 	: parameter_declaration
-	| parameter_list ',' parameter_declaration
+	| parameter_list ',' parameter_declaration {
+		$$ = $1;
+		Node* temp = $1;
+		while(temp->sibing != NULL){
+			temp = temp->sibing;
+		}
+		temp->sibing = $3;
+	}
 	;
 
 parameter_declaration
-	: declaration_specifiers declarator
+	: declaration_specifiers declarator {
+		// 参数类型和参数标识符
+		$$ = $1;
+		Temp_Table[$2->name] = $1->v_type;
+	}
 	| declaration_specifiers abstract_declarator
 	| declaration_specifiers
 	;
@@ -985,8 +1023,28 @@ iteration_statement
 jump_statement
 	: CONTINUE ';'
 	| BREAK ';'
-	| RETURN ';'
-	| RETURN expression ';'
+	| RETURN ';' {
+		$$ = generate_stmt_node();
+		$$->code += "\tret\n";
+	}
+	| RETURN expression ';' {
+		$$ = generate_stmt_node();
+		$$->code += $2->code;
+		if($2->it != -1){
+			$$->code += "\tmov eax, " +temp_table[$2->it] +"\n";
+			$$->code += "\tret\n";
+		}
+		else{
+			if($2->nd_type == ID_t){
+				$$->code += "\tmov eax, " + $2->name +"\n";
+				$$->code += "\tret\n";
+			}
+			else{
+				$$->code += "\tmov eax, " + to_string($2->ivalue) + "\n";
+				$$->code += "\tret\n";
+			}
+		}
+	}
 	;
 
 program
@@ -1026,10 +1084,17 @@ function_definition
 	| declaration_specifiers declarator compound_statement {
 		// 无参函数定义
 		$$ = generate_stmt_node();
-		$$->code += $2->name + " proc\n";
+		ID_Table[$2->name] = "FUNC";
+		Function_Table[$2->name] = fentry;
+		$$->code += $2->name + " proc";
+		if(Temp_Table.size() > 0){
+			$$ -> code += " stdcall";
+			$$ -> code += generate_temp_define();
+		}
+		$$->code += "\n";
 		$$->code += $3->code;
-		$$->code += "\tret\n";
-		$$->code += $2->name + " endp\n";
+		$$->code += $2->name + " endp\n\n";
+		Temp_Table.clear();
 	}			
 	;
 
@@ -1074,8 +1139,8 @@ int main(int argc, char*argv[])
 			// lexer.yyin = new ifstream(argv[1]);
 			// lexer.yyout = new ofstream(argv[2]);
 			table_init();
-			lexer.yyin = new ifstream("input.c");
-			ofstream outf("out.asm");
+			lexer.yyin = new ifstream("pointer.c");
+			ofstream outf("pointer.asm");
 			cout.rdbuf(outf.rdbuf());
 			n = parser.yyparse();
 			// parse_tree.get_label();

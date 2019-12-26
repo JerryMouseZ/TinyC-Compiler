@@ -15,9 +15,9 @@ Node::Node()
     it = -1;
     ivalue = 0;
     fvalue = 0;
-
     begin_label = label_number;
     end_label = label_number;
+    p_depth = 0;
     // next_label = -1;
     // value只能赋值一次，就不做初始化了
 }
@@ -54,7 +54,7 @@ Node *check_type(char *id)
         {
             auto search = Function_Table.find(name);
             auto result = search->second;
-            ret->name = result.name;
+            ret->name = name;
             ret->v_type = result.type;
         }
         else if (type == "POINTER")
@@ -83,18 +83,18 @@ void table_init()
     Function_Table["printf"] = f1;
     Function_Table["scanf"] = f2;
 }
+Node *generate_pointer_node()
+{
+    Node *ret = new Node();
+    ret->v_type = Pointer;
+    ret->p_depth = 1;
+    return ret;
+}
 Node *generate_expr_node()
 {
     Node *ret = NULL;
     ret = new Node();
     ret->nd_type = EXPR_t;
-    // if (label_need)
-    // {
-    //     label_need--;
-    //     ret->end_label = ret->begin_label = next_label;
-    //     label_number++;
-    //     ret->code = "L" + to_string(next_label) + ":\n";
-    // }
     return ret;
 }
 Node *generate_stmt_node()
@@ -102,14 +102,6 @@ Node *generate_stmt_node()
     Node *ret = NULL;
     ret = new Node();
     ret->nd_type = STMT_t;
-    // if (label_need)
-    // {
-    //     label_need--;
-    //     ret->end_label = ret->begin_label = next_label;
-    //     label_number++;
-    //     ret->code = "L" + to_string(next_label) + ":\n";
-    // }
-
     return ret;
 }
 Node *generate_null_node()
@@ -324,7 +316,7 @@ string generate_double_code(Node *node1, Node *node2, string op)
     if (node2->it == -1)
     {
         if (node2->nd_type == ID_t)
-            op2 = node1->name;
+            op2 = node2->name;
         else
             cout << "不允许不是初始值的浮点数常量!" << endl;
     }
@@ -356,34 +348,34 @@ string generate_double_code(Node *node1, Node *node2, string op)
     else if (op == "=")
     {
         // 先把node1弹出, 再压??node2，把node2的值赋给node1
-        ret += "fstp " + node1->name + "\n";
+        ret = "";
         ret += "\tfld " + op2 + "\n\t";
-        ret += "fstp " + node2->name + "\n";
+        ret += "fst " + op1 + "\n";
     }
     else if (op == "+=")
     {
         ret += "\tfld " + op2 + "\n\t";
         ret += "fadd\n";
         // 不弹出的存储
-        ret += "\tfst " + node1->name + "\n";
+        ret += "\tfst " + op1 + "\n";
     }
     else if (op == "-=")
     {
         ret += "\tfld " + op2 + "\n\t";
         ret += "fsub\n";
-        ret += "\tfst " + node1->name + "\n";
+        ret += "\tfst " + op1 + "\n";
     }
     else if (op == "*=")
     {
         ret += "\tfld " + op2 + "\n\t";
         ret += "fmul\n";
-        ret += "\tfst " + node1->name + "\n";
+        ret += "\tfst " + op1 + "\n";
     }
     else if (op == "/=")
     {
         ret += "\tfld " + op2 + "\n\t";
         ret += "fdiv\n";
-        ret += "\tfst " + node1->name + "\n";
+        ret += "\tfst " + op1 + "\n";
     }
     temp_top++;
     if (temp_top > max_top)
@@ -686,17 +678,17 @@ string generate_temp_define()
     {
         string name = i->first;
         VALUE_TYPE entry = i->second;
-        ret += " " + name + ":dd";
+        ret += " " + name + ":dword";
     }
     ret += "\n";
     // 打印输入缓冲
     return ret;
 }
+
 string generate_var_define()
 {
     string ret = ".data\n";
-    auto i = Var_Table.begin();
-    for (; i != Var_Table.end(); i++)
+    for (auto i = Var_Table.begin(); i != Var_Table.end(); i++)
     {
         VarEntry entry = i->second;
         ret += "\t" + entry.name + "\t\t";
@@ -717,6 +709,22 @@ string generate_var_define()
                 ret += to_string(entry.ivalue) + "\n";
                 break;
             }
+        }
+        else
+        {
+            ret += "?\n";
+        }
+    }
+
+    for (auto i = Pointer_Table.begin(); i != Pointer_Table.end(); i++)
+    {
+        PointerEntry entry = i->second;
+        ret += "\t" + entry.name + "\t\t";
+        ret += "dd\t\t";
+        if (entry.state == Valid)
+        {
+            ret += to_string(uint32_t(entry.value)) + "\n";
+               
         }
         else
         {

@@ -36,7 +36,8 @@ enum VALUE_TYPE
     Char,
     String,
     Boolean,
-    None
+    None,
+    Pointer
 }; 
 enum State
 {
@@ -105,6 +106,7 @@ public:
     bool has_value; // 判断value的值是否有效
     int begin_label;
     int end_label;
+    int p_depth;
     // int next_label;
 
 public:
@@ -117,7 +119,7 @@ Node *generate_stmt_node();
 Node *generate_null_node();
 Node *generate_decl_node();
 Node *generate_ID_node();
-
+Node *generate_pointer_node();
 
 Node* check_type(char *id);
 
