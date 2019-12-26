@@ -16,6 +16,7 @@ extern enum ID_TYPE;
 extern enum NODE_TYPE;
 unordered_map<string, string> ID_Table;
 unordered_map<string, VarEntry> Var_Table;
+unordered_map<string, ArrayEntry> Array_Table;
 unordered_map<string, VALUE_TYPE> Temp_Table;
 unordered_map<string, StructEntry> Struct_Table;
 unordered_map<string, FuncEntry> Function_Table;

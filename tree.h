@@ -81,10 +81,15 @@ struct PointerEntry{
     State state;// 状态
     int depth;// 指针的层数
 };
+struct ArrayEntry{
+    VALUE_TYPE type;
+    int num;
+};
 extern FuncEntry fentry;
 // 符号表的填入： 变量声明语句
 extern unordered_map<string, string> ID_Table;
 extern unordered_map<string, VarEntry> Var_Table;
+extern unordered_map<string, ArrayEntry> Array_Table;
 extern unordered_map<string, VALUE_TYPE> Temp_Table;
 extern unordered_map<string, StructEntry> Struct_Table;
 extern unordered_map<string, FuncEntry> Function_Table;
@@ -108,6 +113,7 @@ public:
     int end_label;
     int p_depth;
     bool p_value = false;
+    bool is_array = false;
     // int next_label;
 
 public:

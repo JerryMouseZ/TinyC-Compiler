@@ -1,7 +1,7 @@
 /****************************************************************************
 *                     U N R E G I S T E R E D   C O P Y
 * 
-* You are on day 95 of your 30 day trial period.
+* You are on day 96 of your 30 day trial period.
 * 
 * This file was produced by an UNREGISTERED COPY of Parser Generator. It is
 * for evaluation purposes only. If you continue to use Parser Generator 30
@@ -19,7 +19,7 @@
 * C++ header file generated from mylexer.l.
 * 
 * Date: 12/26/19
-* Time: 13:03:47
+* Time: 16:57:24
 * 
 * ALex Version: 2.07
 ****************************************************************************/
@@ -57,7 +57,7 @@ protected:
 	virtual int yyaction(int action);
 
 public:
-#line 35 ".\\mylexer.l"
+#line 36 ".\\mylexer.l"
 
 	// place any extra class members here
 

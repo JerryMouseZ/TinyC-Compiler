@@ -18,7 +18,6 @@ Node::Node()
     begin_label = label_number;
     end_label = label_number;
     p_depth = 0;
-
     // next_label = -1;
     // value只能赋值一次，就不做初始化了
 }
@@ -61,6 +60,13 @@ Node *check_type(char *id)
         else if (type == "POINTER")
         {
             auto search = Pointer_Table.find(name);
+            auto result = search->second;
+            ret->name = name;
+            ret->v_type = result.type;
+        }
+        else if(type == "ARRAY")
+        {
+            auto search = Array_Table.find(name);
             auto result = search->second;
             ret->name = name;
             ret->v_type = result.type;
@@ -214,7 +220,8 @@ string generate_expr_code(Node *node1, Node *node2, string op)
         if (node1->p_value)
         {
             ret = "";
-            ret += "\tmov dword ptr [edx], " + op2 + "\n";
+            ret += "\tmov ebx, " + op2 + "\n";
+            ret += "\tmov dword ptr [edx], ebx\n";
             ret += "\tmov eax, " + op2 + "\n";
         }
         else{
@@ -746,6 +753,11 @@ string generate_var_define()
     {
         // 打印临时变量表
         ret += "\t" + temp_table[i] + "\tdd\t\t?\n";
+    }
+    // 打印数组列表
+    for (auto i = Array_Table.begin(); i != Array_Table.end();i++){
+        ret += "\t" + i->first + "\tdd\t";
+        ret += to_string(i->second.num) + "\tdup(?)\n";
     }
     ret += "\n";
     // 打印输入缓冲

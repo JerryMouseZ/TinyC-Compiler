@@ -19,6 +19,7 @@ int label_number=0;
 int next_label = 0;
 int label_need = 0;
 vector<string> temp_table; 
+int counter = 0;
 %}
 
 /////////////////////////////////////////////////////////////////////////////
@@ -83,7 +84,41 @@ postfix_expression
 	: primary_expression	{$$ = $1;}
 	| postfix_expression '[' expression ']'	{
 		// 数组
-
+		counter++;
+		$$ = $1;
+		$$->p_value = true;
+		$$->code += $3->code;
+		// 基址
+		$$->code += "\tlea eax, "+ $$->name + "\n";
+		// 偏移量
+		string op1;
+		if ($3->it == -1)
+		{
+			if ($3->nd_type == ID_t)
+				op1 = $3->name;
+			else
+				op1 = to_string($3->ivalue);
+		}
+		else
+		{
+			op1 = temp_table[$3->it];
+			temp_top--;
+		}
+		// 偏移量存在了ebx中
+		$$->code += "\tmov ebx, " + op1 + "\n";
+		$$->code += "\tadd eax, ebx\n";
+		$$->code += "\tmov edx, eax\n";
+		// 取值
+		$$->code += "\tmov eax, dword ptr [eax]\n";
+		// 用一个临时变量存值
+		temp_top++;
+		if (temp_top > max_top)
+		{
+			max_top++;
+			temp_table.push_back("temp_" + to_string(max_top));
+		}
+		$$->code += "\tmov " + temp_table[temp_top] + ", eax\n";
+		$$->it = temp_top;
 	}
 	| postfix_expression '(' ')'	{
 		// 无参函数调用
@@ -629,14 +664,24 @@ declaration
 		Node*temp = $2;
 		while(temp != NULL){
 			if(temp->p_depth ==0){
-				ID_Table[temp->name] = "VAR";
-				VarEntry entry;
-				entry.name = temp->name;
-				entry.type = $1->v_type;
-				entry.ivalue = temp->ivalue;
-				entry.fvalue = temp->fvalue;
-				entry.state = temp->state;
-				Var_Table[temp->name] = entry;
+				if(temp->is_array)
+				{
+					ID_Table[temp->name] = "ARRAY";
+					ArrayEntry entry;
+					entry.type = $1->v_type;
+					entry.num = temp->ivalue;
+					Array_Table[temp->name] = entry;
+				}
+				else{
+					ID_Table[temp->name] = "VAR";
+					VarEntry entry;
+					entry.name = temp->name;
+					entry.type = $1->v_type;
+					entry.ivalue = temp->ivalue;
+					entry.fvalue = temp->fvalue;
+					entry.state = temp->state;
+					Var_Table[temp->name] = entry;
+				}
 			}
 			else{
 				ID_Table[temp->name] = "POINTER";
@@ -677,6 +722,7 @@ init_declarator
 		$$ = $1;
 		// 存入符号表，状态为未初始化
 		$$->state = Not_Init;
+		// 数组初始化会到这 a[10]
 	}
 	| declarator '=' initializer {
 		// a=1
@@ -770,7 +816,11 @@ direct_declarator
 		// cout<< "声明语句标识符"<<endl;
 	}
 	| '(' declarator ')'
-	| direct_declarator '[' assignment_expression ']'
+	| direct_declarator '[' assignment_expression ']' {
+		$$ = $1;
+		$$->is_array = true;
+		$$->ivalue = $3->ivalue;
+	}
 	| direct_declarator '[' '*' ']'
 	| direct_declarator '[' ']'
 	| direct_declarator '(' parameter_type_list ')' {
@@ -1164,8 +1214,8 @@ int main(int argc, char*argv[])
 			// lexer.yyin = new ifstream(argv[1]);
 			// lexer.yyout = new ofstream(argv[2]);
 			table_init();
-			lexer.yyin = new ifstream("pointer.c");
-			ofstream outf("pointer.asm");
+			lexer.yyin = new ifstream("array.c");
+			ofstream outf("array.asm");
 			cout.rdbuf(outf.rdbuf());
 			n = parser.yyparse();
 			// parse_tree.get_label();
