@@ -86,14 +86,14 @@ E			([Ee][+-]?{D}+)
 "while"			{ return(WHILE); }
 
 {L}({L}|{D})*			{ 
-							// Èç¹ûÕÒµ½ÀàÐÍÁË£¬Ó¦µ±¸øÕâ¸ö±êÊ¶·ûÀàÐÍ£¬·ñÔò¾ÍÊÇ¿ÕÀàÐÍ
+							// å¦‚æžœæ‰¾åˆ°ç±»åž‹äº†ï¼Œåº”å½“ç»™è¿™ä¸ªæ ‡è¯†ç¬¦ç±»åž‹ï¼Œå¦åˆ™å°±æ˜¯ç©ºç±»åž‹
 							yylval = check_type(yytext);
-							// IDµÄÃû×Ö´æ´¢ÔÚÁËnameÖÐ
+							// IDçš„åå­—å­˜å‚¨åœ¨äº†nameä¸­
 							return(IDENTIFIER); 
 						}
 
 0[xX]{H}+				{ 
-							// 16½øÖÆÕûÊý
+							// 16è¿›åˆ¶æ•´æ•°
 							stringstream ss;
 							ss<<yytext;
 							int temp;
@@ -104,7 +104,7 @@ E			([Ee][+-]?{D}+)
 							return(CONSTANT);
 						}
 0[0-7]*					{ 
-							// 8½øÖÆÕûÊý
+							// 8è¿›åˆ¶æ•´æ•°
 							stringstream ss;
 							ss<<yytext;
 							int temp;
@@ -115,7 +115,7 @@ E			([Ee][+-]?{D}+)
 							return(CONSTANT); 
 						}
 [1-9]{D}*				{ 
-							// 10½øÖÆÕûÊý
+							// 10è¿›åˆ¶æ•´æ•°
 							stringstream ss;
 							ss<<yytext;
 							int temp;
@@ -133,7 +133,7 @@ E			([Ee][+-]?{D}+)
 						}
 
 {D}+{E}					{ 
-							// 3e8 ¿ÆÑ§¼ÆÊý·¨
+							// 3e8 ç§‘å­¦è®¡æ•°æ³•
 							stringstream ss;
 							ss<<yytext;
 							double temp;
@@ -144,7 +144,7 @@ E			([Ee][+-]?{D}+)
 							return(CONSTANT); 
 						}
 {D}*"."{D}+{E}?			{ 
-							// 1.23e4  ¿ÆÑ§¼ÆÊý·¨
+							// 1.23e4  ç§‘å­¦è®¡æ•°æ³•
 							stringstream ss;
 							ss<<yytext;
 							double temp;
@@ -158,7 +158,7 @@ E			([Ee][+-]?{D}+)
 
 
 L?\"(\\.|[^\\"\n])*\"	{ 
-							// ×Ö·û´®³£Á¿
+							// å­—ç¬¦ä¸²å¸¸é‡
 							stringstream ss;
 							ss<<yytext;
 							string temp;
@@ -227,7 +227,7 @@ int yywrap(void)
 }
 
 
-// ÓÃÀ´¼ÆËãÐÐºÅ¸ø³ö´íÎóÐÅÏ¢
+// ç”¨æ¥è®¡ç®—è¡Œå·ç»™å‡ºé”™è¯¯ä¿¡æ¯
 int column = 0;
 
 
@@ -237,7 +237,7 @@ void countline(char * dd){
 			line++;
 	}
 }
-// ÖÁÓÚÕâ¸öÐÐºÅ¼Ç²»¼ÇÖ»ÊÇ¼ì²éµÄÊ±ºòÓÐÓÃ£¬¿ÉÒÔ²»¹ÜÁË
+// è‡³äºŽè¿™ä¸ªè¡Œå·è®°ä¸è®°åªæ˜¯æ£€æŸ¥çš„æ—¶å€™æœ‰ç”¨ï¼Œå¯ä»¥ä¸ç®¡äº†
 // void count(char*yytext)
 // {
 // 	int i;
@@ -253,7 +253,7 @@ void countline(char * dd){
 // 	// ECHO;
 // }
 
-// ¼ì²é±êÊ¶·ûµÄÀàÐÍ£¬Áô×ÅÒÔºóÓÐÓÃ
+// æ£€æŸ¥æ ‡è¯†ç¬¦çš„ç±»åž‹ï¼Œç•™ç€ä»¥åŽæœ‰ç”¨
 // int check_type(void)
 // {
 // /*

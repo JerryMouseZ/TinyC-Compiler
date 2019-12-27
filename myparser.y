@@ -69,9 +69,9 @@ int counter = 0;
 %%
 primary_expression
 	: IDENTIFIER {
-		// ÀàĞÍ¼ì²é
+		// ç±»å‹æ£€æŸ¥
 		if($1->state == Not_Def){
-			cout<<"Î´¶¨Òå±êÊ¶·û "<<$1->name<<" at line "<<line<<endl;
+			cout<<"æœªå®šä¹‰æ ‡è¯†ç¬¦ "<<$1->name<<" at line "<<line<<endl;
 		}
 		$$ = $1;
 	}
@@ -83,14 +83,14 @@ primary_expression
 postfix_expression
 	: primary_expression	{$$ = $1;}
 	| postfix_expression '[' expression ']'	{
-		// Êı×é
+		// æ•°ç»„
 		counter++;
 		$$ = $1;
 		$$->p_value = true;
 		$$->code += $3->code;
-		// »ùÖ·
+		// åŸºå€
 		$$->code += "\tlea eax, "+ $$->name + "\n";
-		// Æ«ÒÆÁ¿
+		// åç§»é‡
 		string op1;
 		if ($3->it == -1)
 		{
@@ -104,13 +104,13 @@ postfix_expression
 			op1 = temp_table[$3->it];
 			temp_top--;
 		}
-		// Æ«ÒÆÁ¿´æÔÚÁËebxÖĞ
+		// åç§»é‡å­˜åœ¨äº†ebxä¸­
 		$$->code += "\tmov ebx, " + op1 + "\n";
 		$$->code += "\tadd eax, ebx\n";
 		$$->code += "\tmov edx, eax\n";
-		// È¡Öµ
+		// å–å€¼
 		$$->code += "\tmov eax, dword ptr [eax]\n";
-		// ÓÃÒ»¸öÁÙÊ±±äÁ¿´æÖµ
+		// ç”¨ä¸€ä¸ªä¸´æ—¶å˜é‡å­˜å€¼
 		temp_top++;
 		if (temp_top > max_top)
 		{
@@ -121,7 +121,7 @@ postfix_expression
 		$$->it = temp_top;
 	}
 	| postfix_expression '(' ')'	{
-		// ÎŞ²Îº¯Êıµ÷ÓÃ
+		// æ— å‚å‡½æ•°è°ƒç”¨
 		$$ = generate_expr_node();
 		$$->v_type = $1->v_type;
 		$$->code += "\tinvoke "+$1->name;
@@ -145,16 +145,16 @@ postfix_expression
 	}
 	| postfix_expression '(' argument_expression_list ')'	{
 		$$ = generate_expr_node();
-		// ·µ»ØÖµÔÚº¯Êı±êÊ¶·ûÀï¾ÍÓ¦¸ÃÄÃµ½ÁË
+		// è¿”å›å€¼åœ¨å‡½æ•°æ ‡è¯†ç¬¦é‡Œå°±åº”è¯¥æ‹¿åˆ°äº†
 		$$->code += $3->code;
 		$$->children[0] = $1;
 		$$->children[1] = $3;
 		$$->v_type = $1->v_type;
 		if($1->name == "printf"){
-			// µÚÒ»¸ö²ÎÊıÊÇÒ»¸ö×Ö·û´®³£Á¿, ºóÃæÒ»¶Ñ²ÎÊıÊÇÒªÊä³öµÄ¶«Î÷£¬ÄÃµ½Ã¿Ò»¸öµÄop 
-			// ÓÃÒ»¸öÈ«¾Ö±äÁ¿À´´«µİÄÇ¸ö×Ö·û´®ºÃÏñ¾ÍÃ»Ê²Ã´ÎÊÌâÁË
+			// ç¬¬ä¸€ä¸ªå‚æ•°æ˜¯ä¸€ä¸ªå­—ç¬¦ä¸²å¸¸é‡, åé¢ä¸€å †å‚æ•°æ˜¯è¦è¾“å‡ºçš„ä¸œè¥¿ï¼Œæ‹¿åˆ°æ¯ä¸€ä¸ªçš„op 
+			// ç”¨ä¸€ä¸ªå…¨å±€å˜é‡æ¥ä¼ é€’é‚£ä¸ªå­—ç¬¦ä¸²å¥½åƒå°±æ²¡ä»€ä¹ˆé—®é¢˜äº†
 			$$->code += "\tprintf(\"";
-			// ²ÎÊıÁĞ±í
+			// å‚æ•°åˆ—è¡¨
 			$$->code += $3->svalue;
 			$$->code += "\"";
 			Node * temp = $3->sibing;
@@ -168,8 +168,8 @@ postfix_expression
 			$$->code += ")\n";
 		}
 		else if($1->name == "scanf"){
-			// ¶øÇÒÓĞ%lfµÄ»°»¹ÒªÊ¹ÓÃ call ReadFloat
-			// ÊıÀïÃæµÄ°Ù·ÖºÅ£¬ÒÔ %lf ×÷·Ö¸ô·û£¬µ÷ÓÃ¶à´Î invoke __scanf
+			// è€Œä¸”æœ‰%lfçš„è¯è¿˜è¦ä½¿ç”¨ call ReadFloat
+			// æ•°é‡Œé¢çš„ç™¾åˆ†å·ï¼Œä»¥ %lf ä½œåˆ†éš”ç¬¦ï¼Œè°ƒç”¨å¤šæ¬¡ invoke __scanf
 			string format = $3->svalue;
 			Node * temp = $3->sibing;
 			int i = 0;
@@ -180,7 +180,7 @@ postfix_expression
 				// lf
 				if(format[i+1]=='l'){
 					$$->code += "\tcall ReadFloat\n";
-					// ´æ´¢µ½ÏàÓ¦µÄÎ»ÖÃ
+					// å­˜å‚¨åˆ°ç›¸åº”çš„ä½ç½®
 					$$->code += "\tmov eax, " +  temp_table[temp->it] +"\n";
 					$$->code += "\tfstp dword ptr ss:[eax]\n";
 				}
@@ -198,7 +198,7 @@ postfix_expression
 			}
 		}
 		else{
-			// ´ø²Îº¯ÊıµÄµ÷ÓÃ
+			// å¸¦å‚å‡½æ•°çš„è°ƒç”¨
 			$$->code += "\tinvoke "+$1->name;
 			Node * temp = $3;
 			while(temp != NULL){
@@ -220,7 +220,7 @@ postfix_expression
 		}
 	}
 	| postfix_expression '.' IDENTIFIER	{
-		// ½á¹¹²Ù×÷£¬È¡³ö¸Ã½á¹¹µÄ³ÉÔ±
+		// ç»“æ„æ“ä½œï¼Œå–å‡ºè¯¥ç»“æ„çš„æˆå‘˜
 		cout<<"."<<endl;
 	}
 	| postfix_expression INC_OP {
@@ -297,7 +297,7 @@ multiplicative_expression
 		$$->children[0] = $1;
 		$$->children[1] = $3;
 		$1->sibing = $3;
-		$$->code += $1->code + $3->code; // ÏÈ°Ñº¢×ÓµÄ´úÂë¼ÓÉÏ
+		$$->code += $1->code + $3->code; // å…ˆæŠŠå­©å­çš„ä»£ç åŠ ä¸Š
 		if($1->v_type != $3->v_type)
 		{
 			$$->state = Type_Err;
@@ -318,7 +318,7 @@ multiplicative_expression
 		$$->children[1] = $3;
 		$1->sibing = $3;
 
-		$$->code += $1->code + $3->code; // ÏÈ°Ñº¢×ÓµÄ´úÂë¼ÓÉÏ
+		$$->code += $1->code + $3->code; // å…ˆæŠŠå­©å­çš„ä»£ç åŠ ä¸Š
 		if($1->v_type != $3->v_type)
 		{
 			$$->state = Type_Err;
@@ -340,7 +340,7 @@ multiplicative_expression
 		$$->children[1] = $3;
 		$1->sibing = $3;
 
-		$$->code += $1->code + $3->code; // ÏÈ°Ñº¢×ÓµÄ´úÂë¼ÓÉÏ
+		$$->code += $1->code + $3->code; // å…ˆæŠŠå­©å­çš„ä»£ç åŠ ä¸Š
 		if($1->v_type != $3->v_type)
 		{
 			$$->state = Type_Err;
@@ -363,8 +363,8 @@ additive_expression
 		$$->children[0] = $1;
 		$$->children[1] = $3;
 		$1->sibing = $3;
-		// ÏÂÃæ¸ù¾İ+ºÅ¸ø³öÓï·¨ÖÆµ¼·­Òë£¬·­Òë³ö¶şÕßµÄ¾ä×Ó
-		$$->code += $1->code + $3->code; // ÏÈ°Ñº¢×ÓµÄ´úÂë¼ÓÉÏ
+		// ä¸‹é¢æ ¹æ®+å·ç»™å‡ºè¯­æ³•åˆ¶å¯¼ç¿»è¯‘ï¼Œç¿»è¯‘å‡ºäºŒè€…çš„å¥å­
+		$$->code += $1->code + $3->code; // å…ˆæŠŠå­©å­çš„ä»£ç åŠ ä¸Š
 		if($1->v_type != $3->v_type)
 		{
 			$$->state = Type_Err;
@@ -381,7 +381,7 @@ additive_expression
 		
 	}
 	| additive_expression '-' multiplicative_expression {
-		$$->code += $1->code + $3->code; // ÏÈ°Ñº¢×ÓµÄ´úÂë¼ÓÉÏ
+		$$->code += $1->code + $3->code; // å…ˆæŠŠå­©å­çš„ä»£ç åŠ ä¸Š
 		if($1->v_type != $3->v_type)
 		{
 			$$->state = Type_Err;
@@ -407,7 +407,7 @@ shift_expression
 		$$->children[1] = $3;
 		$1->sibing = $3;
 
-		$$->code += $1->code + $3->code; // ÏÈ°Ñº¢×ÓµÄ´úÂë¼ÓÉÏ
+		$$->code += $1->code + $3->code; // å…ˆæŠŠå­©å­çš„ä»£ç åŠ ä¸Š
 		if($1->v_type != $3->v_type)
 		{
 			$$->state = Type_Err;
@@ -424,7 +424,7 @@ shift_expression
 		$$->children[1] = $3;
 		$1->sibing = $3;
 
-		$$->code += $1->code + $3->code; // ÏÈ°Ñº¢×ÓµÄ´úÂë¼ÓÉÏ
+		$$->code += $1->code + $3->code; // å…ˆæŠŠå­©å­çš„ä»£ç åŠ ä¸Š
 		if($1->v_type != $3->v_type)
 		{
 			$$->state = Type_Err;
@@ -519,7 +519,7 @@ and_expression
 		$$->children[1] = $3;
 		$1->sibing = $3;
 
-		$$->code += $1->code + $3->code; // ÏÈ°Ñº¢×ÓµÄ´úÂë¼ÓÉÏ
+		$$->code += $1->code + $3->code; // å…ˆæŠŠå­©å­çš„ä»£ç åŠ ä¸Š
 		if($1->v_type != $3->v_type)
 		{
 			$$->state = Type_Err;
@@ -542,7 +542,7 @@ exclusive_or_expression
 		$$->children[1] = $3;
 		$1->sibing = $3;
 
-		$$->code += $1->code + $3->code; // ÏÈ°Ñº¢×ÓµÄ´úÂë¼ÓÉÏ
+		$$->code += $1->code + $3->code; // å…ˆæŠŠå­©å­çš„ä»£ç åŠ ä¸Š
 		if($1->v_type != $3->v_type)
 		{
 			$$->state = Type_Err;
@@ -563,7 +563,7 @@ inclusive_or_expression
 		$$->children[1] = $3;
 		$1->sibing = $3;
 
-		$$->code += $1->code + $3->code; // ÏÈ°Ñº¢×ÓµÄ´úÂë¼ÓÉÏ
+		$$->code += $1->code + $3->code; // å…ˆæŠŠå­©å­çš„ä»£ç åŠ ä¸Š
 		if($1->v_type != $3->v_type)
 		{
 			$$->state = Type_Err;
@@ -613,7 +613,7 @@ assignment_expression
 		$$->children[1] = $3;
 		$1->sibing = $3;
 
-		$$->code += $1->code + $3->code; // ÏÈ°Ñº¢×ÓµÄ´úÂë¼ÓÉÏ
+		$$->code += $1->code + $3->code; // å…ˆæŠŠå­©å­çš„ä»£ç åŠ ä¸Š
 		if($1->v_type != $3->v_type)
 		{
 			$$->state = Type_Err;
@@ -647,7 +647,7 @@ assignment_operator
 expression
 	: assignment_expression {$$ = $1;}
 	| expression ',' assignment_expression {
-		// ºÍ listµÄ´¦Àí·½·¨Ò»Ñù
+		// å’Œ listçš„å¤„ç†æ–¹æ³•ä¸€æ ·
 
 	}
 	;
@@ -658,8 +658,8 @@ constant_expression
 
 declaration
 	: declaration_specifiers init_declarator_list ';' {
-		// ±äÁ¿ÉùÃ÷Óï¾ä
-		// ±éÀúinit_declarator_list, °ÑËùÓĞÏî¼ÓÈë·ûºÅ±í
+		// å˜é‡å£°æ˜è¯­å¥
+		// éå†init_declarator_list, æŠŠæ‰€æœ‰é¡¹åŠ å…¥ç¬¦å·è¡¨
 		$$ = generate_decl_node();
 		Node*temp = $2;
 		while(temp != NULL){
@@ -692,11 +692,11 @@ declaration
 				entry.state = temp->state;
 				Pointer_Table[temp->name] = entry;
 			}
-			// ĞèÒª¶îÍâ³õÊ¼»¯µÄ´úÂë¼ÓÉÏ
+			// éœ€è¦é¢å¤–åˆå§‹åŒ–çš„ä»£ç åŠ ä¸Š
 			$$->code += temp->code;
 			temp = temp->sibing;
 		}
-		// ÔõÑù±£ÁôÄÇĞ©ĞèÒª¸´ÔÓ³õÊ¼»¯µÄ´úÂëÄØ
+		// æ€æ ·ä¿ç•™é‚£äº›éœ€è¦å¤æ‚åˆå§‹åŒ–çš„ä»£ç å‘¢
 	}
 	;
 
@@ -720,21 +720,21 @@ init_declarator
 	: declarator {
 		// a
 		$$ = $1;
-		// ´æÈë·ûºÅ±í£¬×´Ì¬ÎªÎ´³õÊ¼»¯
+		// å­˜å…¥ç¬¦å·è¡¨ï¼ŒçŠ¶æ€ä¸ºæœªåˆå§‹åŒ–
 		$$->state = Not_Init;
-		// Êı×é³õÊ¼»¯»áµ½Õâ a[10]
+		// æ•°ç»„åˆå§‹åŒ–ä¼šåˆ°è¿™ a[10]
 	}
 	| declarator '=' initializer {
 		// a=1
-		// Èç¹ûÓÃ³£Á¿³õÊ¼»¯£¬Ôò$3->has_value=true
+		// å¦‚æœç”¨å¸¸é‡åˆå§‹åŒ–ï¼Œåˆ™$3->has_value=true
 		if($3->has_value){
 			$$ = $1;
 			copyValue($$, $3);
 			$$->state = Valid;
 		}
 		else{
-			// ·ñÔòÉú³É¸³ÖµÓï¾äµÄ´úÂë
-			$$->code += $3->code; // ÏÈ°Ñ¼ÆËã½á¹ûµÄ´úÂë¼ÓÉÏ
+			// å¦åˆ™ç”Ÿæˆèµ‹å€¼è¯­å¥çš„ä»£ç 
+			$$->code += $3->code; // å…ˆæŠŠè®¡ç®—ç»“æœçš„ä»£ç åŠ ä¸Š
 			if($3->v_type == Double)
 				$$->code += generate_double_code($1, $3,"=");
 			else
@@ -813,7 +813,7 @@ declarator
 direct_declarator
 	: IDENTIFIER {
 		$$ = $1;
-		// cout<< "ÉùÃ÷Óï¾ä±êÊ¶·û"<<endl;
+		// cout<< "å£°æ˜è¯­å¥æ ‡è¯†ç¬¦"<<endl;
 	}
 	| '(' declarator ')'
 	| direct_declarator '[' assignment_expression ']' {
@@ -824,12 +824,12 @@ direct_declarator
 	| direct_declarator '[' '*' ']'
 	| direct_declarator '[' ']'
 	| direct_declarator '(' parameter_type_list ')' {
-		// ´ø²Îº¯ÊıµÄÉùÃ÷
+		// å¸¦å‚å‡½æ•°çš„å£°æ˜
 		$$ = $1;
 	}
 	| direct_declarator '(' identifier_list ')'
 	| direct_declarator '(' ')' {
-		// ÎŞ²Îº¯ÊıµÄÉùÃ÷ºÍµ÷ÓÃ
+		// æ— å‚å‡½æ•°çš„å£°æ˜å’Œè°ƒç”¨
 	}
 	;
 
@@ -859,7 +859,7 @@ parameter_list
 
 parameter_declaration
 	: declaration_specifiers declarator {
-		// ²ÎÊıÀàĞÍºÍ²ÎÊı±êÊ¶·û
+		// å‚æ•°ç±»å‹å’Œå‚æ•°æ ‡è¯†ç¬¦
 		$$ = $1;
 		Temp_Table[$2->name] = $1->v_type;
 	}
@@ -895,7 +895,7 @@ direct_abstract_declarator
 
 initializer
 	: assignment_expression {
-		// Ğã°¡£¬»¹ÓÃ±í´ïÊ½À´³õÊ¼»¯£¬ÄÇ³õÊ¼»¯Öµ¾ÍÊÇÃ»ÓĞµÄÁË
+		// ç§€å•Šï¼Œè¿˜ç”¨è¡¨è¾¾å¼æ¥åˆå§‹åŒ–ï¼Œé‚£åˆå§‹åŒ–å€¼å°±æ˜¯æ²¡æœ‰çš„äº†
 		$$ = $1;
 	}
 	| '{' initializer_list '}'
@@ -948,7 +948,7 @@ compound_statement
 block_item_list
 	: block_item {$$ = $1;}
 	| block_item_list block_item {
-		// Òª´®ÆğÀ´
+		// è¦ä¸²èµ·æ¥
 		$$ = $1;
 		Node*temp = $$;
 		while(temp->sibing != NULL)
@@ -1021,10 +1021,10 @@ iteration_statement
 		$$->children[0] = $3;
 		$$->children[1] = $4;
 		$$->children[2] = $6;
-		// Ñ­»·Ò»°ãĞèÒªÁ½¸ö±êÇ©
+		// å¾ªç¯ä¸€èˆ¬éœ€è¦ä¸¤ä¸ªæ ‡ç­¾
 		$$->code += $3->code;
 		$$->code += "\tjmp L" + to_string(label_number+1) + "\n";
-		// ½ÓÏÂÀ´Ó¦¸ÃÊÇÕıÊ½ÔËĞĞµÄ´úÂë
+		// æ¥ä¸‹æ¥åº”è¯¥æ˜¯æ­£å¼è¿è¡Œçš„ä»£ç 
 		$$->code += "L" + to_string(label_number) + ":\n";
 		$$->code += $6->code;
 		$$->code += "\tjmp L" + to_string(label_number+1) + "\n";
@@ -1039,11 +1039,11 @@ iteration_statement
 		$$ = generate_stmt_node();
 		$$->children[0] = $3;
 		$$->children[1] = $4;
-		// Ñ­»·Ò»°ãĞèÒªÁ½¸ö±êÇ©
+		// å¾ªç¯ä¸€èˆ¬éœ€è¦ä¸¤ä¸ªæ ‡ç­¾
 		$$->code += $3->code;
 		$$->code += "\tjmp L" + to_string(label_number+1) + "\n";
-		// ½ÓÏÂÀ´Ó¦¸ÃÊÇÕıÊ½ÔËĞĞµÄ´úÂë
-		// ÕıÊ½ÔËĞĞµÄ´úÂëÒª¼Ó$5
+		// æ¥ä¸‹æ¥åº”è¯¥æ˜¯æ­£å¼è¿è¡Œçš„ä»£ç 
+		// æ­£å¼è¿è¡Œçš„ä»£ç è¦åŠ $5
 		$$->code += "L" + to_string(label_number) + ":\n";
 		$$->code += $7->code;
 		$$->code += $5->code;
@@ -1059,10 +1059,10 @@ iteration_statement
 		$$ = generate_stmt_node();
 		$$->children[0] = $3;
 		$$->children[1] = $4;
-		// Ñ­»·Ò»°ãĞèÒªÁ½¸ö±êÇ©
+		// å¾ªç¯ä¸€èˆ¬éœ€è¦ä¸¤ä¸ªæ ‡ç­¾
 		$$->code += $3->code;
 		$$->code += "\tjmp L" + to_string(label_number+1) + "\n";
-		// ½ÓÏÂÀ´Ó¦¸ÃÊÇÕıÊ½ÔËĞĞµÄ´úÂë
+		// æ¥ä¸‹æ¥åº”è¯¥æ˜¯æ­£å¼è¿è¡Œçš„ä»£ç 
 		$$->code += "L" + to_string(label_number) + ":\n";
 		$$->code += $6->code;
 		$$->code += "\tjmp L" + to_string(label_number+1) + "\n";
@@ -1077,11 +1077,11 @@ iteration_statement
 		$$ = generate_stmt_node();
 		$$->children[0] = $3;
 		$$->children[1] = $4;
-		// Ñ­»·Ò»°ãĞèÒªÁ½¸ö±êÇ©
+		// å¾ªç¯ä¸€èˆ¬éœ€è¦ä¸¤ä¸ªæ ‡ç­¾
 		$$->code += $3->code;
 		$$->code += "\tjmp L" + to_string(label_number+1) + "\n";
-		// ½ÓÏÂÀ´Ó¦¸ÃÊÇÕıÊ½ÔËĞĞµÄ´úÂë
-		// ÕıÊ½ÔËĞĞµÄ´úÂëÒª¼Ó$5
+		// æ¥ä¸‹æ¥åº”è¯¥æ˜¯æ­£å¼è¿è¡Œçš„ä»£ç 
+		// æ­£å¼è¿è¡Œçš„ä»£ç è¦åŠ $5
 		$$->code += "L" + to_string(label_number) + ":\n";
 		$$->code += $7->code;
 		$$->code += $5->code;
@@ -1157,7 +1157,7 @@ function_definition
 
 	}
 	| declaration_specifiers declarator compound_statement {
-		// ÎŞ²Îº¯Êı¶¨Òå
+		// æ— å‚å‡½æ•°å®šä¹‰
 		$$ = generate_stmt_node();
 		ID_Table[$2->name] = "FUNC";
 		Function_Table[$2->name] = fentry;
@@ -1210,7 +1210,7 @@ int main(int argc, char*argv[])
 	myparser parser;
 	if (parser.yycreate(&lexer)) {
 		if (lexer.yycreate(&parser)) {
-			// ×îºó²âÊÔ³É¹¦ÁËÒÔºóÔÙ¸ÄÎÄ¼ş
+			// æœ€åæµ‹è¯•æˆåŠŸäº†ä»¥åå†æ”¹æ–‡ä»¶
 			// lexer.yyin = new ifstream(argv[1]);
 			// lexer.yyout = new ofstream(argv[2]);
 			table_init();

@@ -19,13 +19,13 @@ Node::Node()
     end_label = label_number;
     p_depth = 0;
     // next_label = -1;
-    // valueÖ»ÄÜ¸³ÖµÒ»´Î£¬¾Í²»×ö³õÊ¼»¯ÁË
+    // valueåªèƒ½èµ‹å€¼ä¸€æ¬¡ï¼Œå°±ä¸åšåˆå§‹åŒ–äº†
 }
 Node *check_type(char *id)
 {
     Node *ret = generate_ID_node();
     string name = id;
-    // ÓĞÏŞÈ¥ÁÙÊ±·ûºÅ±íÀïÕÒ
+    // æœ‰é™å»ä¸´æ—¶ç¬¦å·è¡¨é‡Œæ‰¾
     auto mm_search = Temp_Table.find(name);
     if (mm_search != Temp_Table.end())
     {
@@ -144,7 +144,7 @@ Node *generate_ID_node()
 string generate_expr_code(Node *node1, Node *node2, string op)
 {
     string ret;
-    string op1; // op1 »¹¿ÉÄÜÊÇ±êÊ¶·ûºÍ³£Á¿£¬Ã»ÓĞÁÙÊ±±äÁ¿
+    string op1; // op1 è¿˜å¯èƒ½æ˜¯æ ‡è¯†ç¬¦å’Œå¸¸é‡ï¼Œæ²¡æœ‰ä¸´æ—¶å˜é‡
     if (node1->it == -1)
     {
         if (node1->nd_type == ID_t)
@@ -172,7 +172,7 @@ string generate_expr_code(Node *node1, Node *node2, string op)
         temp_top--;
     }
     // ret+= + "\tmov ebx, " + temp_table[node2->it] + "\n"
-    // ÆäÊµ??¶ş¸ö±äÁ¿ÍêÈ«²»ÓÃ¼ÓÔØ£¬ÒòÎªÖ§³Ö???¶ş¸öµØÖ·ÔÚÄÚ???
+    // å…¶å®??äºŒä¸ªå˜é‡å®Œå…¨ä¸ç”¨åŠ è½½ï¼Œå› ä¸ºæ”¯æŒ???äºŒä¸ªåœ°å€åœ¨å†…???
     ret += "\t";
     if (op == "-")
     {
@@ -188,14 +188,14 @@ string generate_expr_code(Node *node1, Node *node2, string op)
     }
     else if (op == "/")
     {
-        // ÓàÊı½á¹û±£´æÔÚedx?
+        // ä½™æ•°ç»“æœä¿å­˜åœ¨edx?
         ret += "mov edx, 0\n\t";
         ret += "mov ebx, " + op2 + "\n";
         ret += "\tidiv ebx\n";
     }
     else if (op == "%")
     {
-        // ÓàÊıµÄ½á¹û±£´æÔÚedx???
+        // ä½™æ•°çš„ç»“æœä¿å­˜åœ¨edx???
         ret += "mov edx, 0\n\t";
         ret += "mov ebx, " + op2 + "\n";
         ret += "\tidiv ebx\n";
@@ -212,11 +212,11 @@ string generate_expr_code(Node *node1, Node *node2, string op)
     {
         ret += "and eax, " + op2 + "\n";
     }
-    // ´øµÈÓÚµÄ·µ»ØÖµÏàÍ¬£¬????ÒªĞŞ¸Ä×ó²Ù×÷
-    // ĞèÒª¶¯×ó½ÚµãµÄµØÖ·
+    // å¸¦ç­‰äºçš„è¿”å›å€¼ç›¸åŒï¼Œ????è¦ä¿®æ”¹å·¦æ“ä½œ
+    // éœ€è¦åŠ¨å·¦èŠ‚ç‚¹çš„åœ°å€
     else if (op == "=")
     {
-        // ÄÃµ½node1µÄÔÚ·ûºÅ±íÖĞ´æ´¢µÄ±äÁ¿Ãû
+        // æ‹¿åˆ°node1çš„åœ¨ç¬¦å·è¡¨ä¸­å­˜å‚¨çš„å˜é‡å
         if (node1->p_value)
         {
             ret = "";
@@ -302,7 +302,7 @@ string generate_expr_code(Node *node1, Node *node2, string op)
         max_top++;
         temp_table.push_back("temp_" + to_string(max_top));
     }
-    // È¡Ä£µÄÔËËã½á¹¹ÔÚedxÖĞ£¬·ñÔòÔÚeaxÖĞ
+    // å–æ¨¡çš„è¿ç®—ç»“æ„åœ¨edxä¸­ï¼Œå¦åˆ™åœ¨eaxä¸­
     if (op == "%")
         ret += "\tmov " + temp_table[temp_top] + ", edx\n";
     else
@@ -312,16 +312,16 @@ string generate_expr_code(Node *node1, Node *node2, string op)
 
 string generate_double_code(Node *node1, Node *node2, string op)
 {
-    // Éú³É??µãÊı´ú??
+    // ç”Ÿæˆ??ç‚¹æ•°ä»£??
     string ret;
-    string op1; // op1 »¹¿ÉÄÜÊÇ±êÊ¶·ûºÍ³£Á¿£¬Ã»ÓĞÁÙÊ±±äÁ¿
+    string op1; // op1 è¿˜å¯èƒ½æ˜¯æ ‡è¯†ç¬¦å’Œå¸¸é‡ï¼Œæ²¡æœ‰ä¸´æ—¶å˜é‡
     if (node1->it == -1)
     {
         if (node1->nd_type == ID_t)
             op1 = node1->name;
         else
         {
-            cout << "²»ÔÊĞí²»ÊÇ³õÊ¼ÖµµÄ¸¡µãÊı³£Á¿!" << endl;
+            cout << "ä¸å…è®¸ä¸æ˜¯åˆå§‹å€¼çš„æµ®ç‚¹æ•°å¸¸é‡!" << endl;
         }
     }
     else
@@ -336,7 +336,7 @@ string generate_double_code(Node *node1, Node *node2, string op)
         if (node2->nd_type == ID_t)
             op2 = node2->name;
         else
-            cout << "²»ÔÊĞí²»ÊÇ³õÊ¼ÖµµÄ¸¡µãÊı³£Á¿!" << endl;
+            cout << "ä¸å…è®¸ä¸æ˜¯åˆå§‹å€¼çš„æµ®ç‚¹æ•°å¸¸é‡!" << endl;
     }
     else
     {
@@ -365,7 +365,7 @@ string generate_double_code(Node *node1, Node *node2, string op)
     }
     else if (op == "=")
     {
-        // ÏÈ°Ñnode1µ¯³ö, ÔÙÑ¹??node2£¬°Ñnode2µÄÖµ¸³¸ønode1
+        // å…ˆæŠŠnode1å¼¹å‡º, å†å‹??node2ï¼ŒæŠŠnode2çš„å€¼èµ‹ç»™node1
         ret = "";
         ret += "\tfld " + op2 + "\n\t";
         ret += "fst " + op1 + "\n";
@@ -374,7 +374,7 @@ string generate_double_code(Node *node1, Node *node2, string op)
     {
         ret += "\tfld " + op2 + "\n\t";
         ret += "fadd\n";
-        // ²»µ¯³öµÄ´æ´¢
+        // ä¸å¼¹å‡ºçš„å­˜å‚¨
         ret += "\tfst " + op1 + "\n";
     }
     else if (op == "-=")
@@ -405,19 +405,19 @@ string generate_double_code(Node *node1, Node *node2, string op)
     return ret;
 }
 
-// Ç°×ºµ¥Ä¿±í´ï???
+// å‰ç¼€å•ç›®è¡¨è¾¾???
 string generate_pre_code(Node *node, string op)
 {
-    // »¹ÊÇÒ»Ñù£¬µÚÒ»¸öÓ¦¸ÃÊÇ±êÊ¶·û£¬»òÕßÊÇ±í´ïÊ½
+    // è¿˜æ˜¯ä¸€æ ·ï¼Œç¬¬ä¸€ä¸ªåº”è¯¥æ˜¯æ ‡è¯†ç¬¦ï¼Œæˆ–è€…æ˜¯è¡¨è¾¾å¼
     string ret;
-    string op1; // op1 »¹¿ÉÄÜÊÇ±êÊ¶·ûºÍ³£Á¿£¬Ã»ÓĞÁÙÊ±±äÁ¿
+    string op1; // op1 è¿˜å¯èƒ½æ˜¯æ ‡è¯†ç¬¦å’Œå¸¸é‡ï¼Œæ²¡æœ‰ä¸´æ—¶å˜é‡
     if (node->it == -1)
     {
         if (node->nd_type == ID_t)
             op1 = node->name;
         else
         {
-            cout << "²»¿É±»¸³ÖµµÄ×óÖµ: at line: " << line << endl;
+            cout << "ä¸å¯è¢«èµ‹å€¼çš„å·¦å€¼: at line: " << line << endl;
         }
     }
     else
@@ -428,30 +428,30 @@ string generate_pre_code(Node *node, string op)
     ret += "\tmov eax, " + op1 + "\n";
     if (op == "&")
     {
-        // È¡µØÖ·
+        // å–åœ°å€
         ret = "";
         ret += "\tmov eax, offset " + op1 + "\n";
     }
     else if (op == "*")
     {
-        // È¡Öµ
+        // å–å€¼
         ret += "\tmov edx, eax\n";
         ret += "\tmov eax, [eax]\n";
     }
     else if (op == "-")
     {
-        // È¡·´
+        // å–å
         ret += "\tmov ebx, eax\n\tmov eax, 0\n";
         ret += "\tsub eax, ebx\n";
     }
     else if (op == "~")
     {
-        // °´Î»È¡·´
+        // æŒ‰ä½å–å
         ret += "\tnot eax\n";
     }
     else if (op == "!")
     {
-        // Âß¼­
+        // é€»è¾‘
         ret += "\tnot eax\n";
         ret += "\tand eax, 1\n";
     }
@@ -474,18 +474,18 @@ string generate_pre_code(Node *node, string op)
     ret += "\tmov " + temp_table[temp_top] + ", eax\n";
     return ret;
 }
-// ºó×ºµ¥Ä¿±í´ï???
+// åç¼€å•ç›®è¡¨è¾¾???
 string generate_post_code(Node *node, string op)
 {
     string ret;
-    string op1; // op1 »¹¿ÉÄÜÊÇ±êÊ¶·ûºÍ³£Á¿£¬Ã»ÓĞÁÙÊ±±äÁ¿
+    string op1; // op1 è¿˜å¯èƒ½æ˜¯æ ‡è¯†ç¬¦å’Œå¸¸é‡ï¼Œæ²¡æœ‰ä¸´æ—¶å˜é‡
     if (node->it == -1)
     {
         if (node->nd_type == ID_t)
             op1 = node->name;
         else
         {
-            cout << "²»¿É±»¸³ÖµµÄ×óÖµ: at line: " << line << endl;
+            cout << "ä¸å¯è¢«èµ‹å€¼çš„å·¦å€¼: at line: " << line << endl;
         }
     }
     else
@@ -512,15 +512,15 @@ string generate_post_code(Node *node, string op)
         ret += "\tdec eax\n";
         ret += "\tmov " + node->name + ", eax\n";
     }
-    // ºó×º±í´ïÊ½·µ»ØÖ®Ç°µÄÖµ¾ÍĞĞÁË
+    // åç¼€è¡¨è¾¾å¼è¿”å›ä¹‹å‰çš„å€¼å°±è¡Œäº†
     return ret;
 }
 
 string generate_bool_code(Node *node1, Node *node2, string op)
 {
     string ret;
-    // ÅĞ¶Ï×óÓÒ²Ù×÷ÊıÊÇid»¹ÊÇÓĞÁÙÊ±±äÁ¿
-    string op1; // op1 »¹¿ÉÄÜÊÇ±êÊ¶·ûºÍ³£Á¿£¬Ã»ÓĞÁÙÊ±±äÁ¿
+    // åˆ¤æ–­å·¦å³æ“ä½œæ•°æ˜¯idè¿˜æ˜¯æœ‰ä¸´æ—¶å˜é‡
+    string op1; // op1 è¿˜å¯èƒ½æ˜¯æ ‡è¯†ç¬¦å’Œå¸¸é‡ï¼Œæ²¡æœ‰ä¸´æ—¶å˜é‡
     if (node1->it == -1)
     {
         if (node1->nd_type == ID_t)
@@ -547,7 +547,7 @@ string generate_bool_code(Node *node1, Node *node2, string op)
         op2 = temp_table[node2->it];
         temp_top--;
     }
-    // ¸ù¾İÔËËã·ûÉú³É´úÂë
+    // æ ¹æ®è¿ç®—ç¬¦ç”Ÿæˆä»£ç 
     if (op == "<=")
     {
         ret += "\tcmp eax, " + op2 + "\n";
@@ -578,7 +578,7 @@ string generate_bool_code(Node *node1, Node *node2, string op)
         ret += "\tcmp eax, " + op2 + "\n";
         ret += "\tjg L" + to_string(label_number) + "\n";
     }
-    // ÕâÀï½á¹û²»ÒªÓÃop1ÁË£¬ÔÙ¼ÓÒ»¸öÁÙÊ±±äÁ¿
+    // è¿™é‡Œç»“æœä¸è¦ç”¨op1äº†ï¼Œå†åŠ ä¸€ä¸ªä¸´æ—¶å˜é‡
     ret += "\tmov eax, 0\n";
     ret += "\tjmp L" + to_string(label_number + 1) + "\n";
     ret += "L" + to_string(label_number) + ":\n";
@@ -599,8 +599,8 @@ string generate_bool_code(Node *node1, Node *node2, string op)
 string generate_and_or_code(Node *node1, Node *node2, string op)
 {
     string ret;
-    // ÅĞ¶Ï×óÓÒ²Ù×÷ÊıÊÇid»¹ÊÇÓĞÁÙÊ±±äÁ¿
-    string op1; // op1 »¹¿ÉÄÜÊÇ±êÊ¶·ûºÍ³£Á¿£¬Ã»ÓĞÁÙÊ±±äÁ¿
+    // åˆ¤æ–­å·¦å³æ“ä½œæ•°æ˜¯idè¿˜æ˜¯æœ‰ä¸´æ—¶å˜é‡
+    string op1; // op1 è¿˜å¯èƒ½æ˜¯æ ‡è¯†ç¬¦å’Œå¸¸é‡ï¼Œæ²¡æœ‰ä¸´æ—¶å˜é‡
     if (node1->it == -1)
     {
         if (node1->nd_type == ID_t)
@@ -629,12 +629,12 @@ string generate_and_or_code(Node *node1, Node *node2, string op)
     }
     if (op == "&&")
     {
-        // µ«ÊÇ°´Î»Óë²»Ò»¶¨ÄÜÊµÏÖÓëµÄ¹¦ÄÜÈç 010 Óë 101
+        // ä½†æ˜¯æŒ‰ä½ä¸ä¸ä¸€å®šèƒ½å®ç°ä¸çš„åŠŸèƒ½å¦‚ 010 ä¸ 101
         ret += "\tand eax, " + op2 + "\n";
     }
     else if (op == "||")
     {
-        // °´Î»»ò¿ÉÒÔÊµÏÖ»òµÄ¹¦ÄÜ
+        // æŒ‰ä½æˆ–å¯ä»¥å®ç°æˆ–çš„åŠŸèƒ½
         ret += "\tor eax, " + op2 + "\n";
     }
     temp_top++;
@@ -651,14 +651,14 @@ string generate_if_code(Node *node1, Node *node2, Node *node3)
 {
     string ret;
     ret += node1->code;
-    string op1; // op1 »¹¿ÉÄÜÊÇ±êÊ¶·ûºÍ³£Á¿£¬Ã»ÓĞÁÙÊ±±äÁ¿
+    string op1; // op1 è¿˜å¯èƒ½æ˜¯æ ‡è¯†ç¬¦å’Œå¸¸é‡ï¼Œæ²¡æœ‰ä¸´æ—¶å˜é‡
     if (node1->it == -1)
     {
         if (node1->nd_type == ID_t)
             op1 = node1->name;
         else
         {
-            cout << "²»¿É±»¸³ÖµµÄ×óÖµ: at line: " << line << endl;
+            cout << "ä¸å¯è¢«èµ‹å€¼çš„å·¦å€¼: at line: " << line << endl;
         }
     }
     else
@@ -666,22 +666,22 @@ string generate_if_code(Node *node1, Node *node2, Node *node3)
         op1 = temp_table[node1->it];
         temp_top--;
     }
-    // ±È½Ï
+    // æ¯”è¾ƒ
     ret += "\tcmp " + op1 + ", 0\n";
-    // Èç¹ûÎª0jmpµ½ false label
+    // å¦‚æœä¸º0jmpåˆ° false label
     ret += "\tje L" + to_string(label_number + 1) + "\n";
     ret += node2->code;
-    // Èç¹ûÊÇif else Óï¾ä£¬Ö±½Ó¾ÍÓĞfalse label
+    // å¦‚æœæ˜¯if else è¯­å¥ï¼Œç›´æ¥å°±æœ‰false label
     if (node3 != NULL)
     {
         label_number++;
-        // ¸Õ²ÅµÄÓï¾äĞèÒªÖ±½ÓÌø×ªµ½ÏÂÃæ
+        // åˆšæ‰çš„è¯­å¥éœ€è¦ç›´æ¥è·³è½¬åˆ°ä¸‹é¢
         ret += "\tjmp L" + to_string(label_number + 1) + "\n";
         ret += "L" + to_string(label_number) + ":\n";
         ret += node3->code;
     }
-    // ½ÓÏÂÀ´ÊÇÏÂÒ»¾äÓï¾äÁË
-    // next_label±»Õ¼ÓÃÁË£¬²»Ó¦¸ø±ğÈËÊ¹ÓÃ
+    // æ¥ä¸‹æ¥æ˜¯ä¸‹ä¸€å¥è¯­å¥äº†
+    // next_labelè¢«å ç”¨äº†ï¼Œä¸åº”ç»™åˆ«äººä½¿ç”¨
     label_number++;
     ret += "L" + to_string(label_number) + ":\n";
     label_number++;
@@ -699,7 +699,7 @@ string generate_temp_define()
         ret += " " + name + ":dword";
     }
     ret += "\n";
-    // ´òÓ¡ÊäÈë»º³å
+    // æ‰“å°è¾“å…¥ç¼“å†²
     return ret;
 }
 
@@ -751,16 +751,16 @@ string generate_var_define()
     }
     for (int i = 0; i <= max_top; i++)
     {
-        // ´òÓ¡ÁÙÊ±±äÁ¿±í
+        // æ‰“å°ä¸´æ—¶å˜é‡è¡¨
         ret += "\t" + temp_table[i] + "\tdd\t\t?\n";
     }
-    // ´òÓ¡Êı×éÁĞ±í
+    // æ‰“å°æ•°ç»„åˆ—è¡¨
     for (auto i = Array_Table.begin(); i != Array_Table.end();i++){
         ret += "\t" + i->first + "\tdd\t";
         ret += to_string(i->second.num) + "\tdup(?)\n";
     }
     ret += "\n";
-    // ´òÓ¡ÊäÈë»º³å
+    // æ‰“å°è¾“å…¥ç¼“å†²
     ret += ".code\n";
     //    .code
     ret += "start:\n\tcall main\n\tinkey\n\tret\n\n";
